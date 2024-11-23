@@ -58,8 +58,7 @@ Részletesen minden technológiáról?
 - mérések és kiértékelések
   - gyűjtött adatok miért ezeket? (lehet kövi fejezet)
 - python csomagok
-  - ha nem lenne elég az 50 oldalhoz chatgpt megtolhatja
-  - scikit talán a bayesian opt-hoz
+  - felsorolás max
 
 ## 3. fejezet Szimulációs eszköz tervezése és megvalósítása
 főleg ROADMAP-ek tartalma
@@ -68,7 +67,6 @@ irodalmi áttekintésben ros2 nav2 gazebo alapok itt az actual problémák és m
   - docker image
   - ezen belül ros2
 - nav2 fork
-  -
 
 
 ## 4. fejezet Optimalizációs eljárások - megvalósítás
@@ -96,6 +94,12 @@ Itt amúgy mindegyikről lehet írni mennyi idő, vagy erőforrásokról (comput
 
 ## 6. fejezet Összefoglalás
 
+# TODO:
+- képletek
+  - mppi - whitepaper - forrás
+- paraméterek közötti összehasonlítás
+- nav2ből kiemelni rögzített paramétereket
+-
 
 
 # TODO: mérések
@@ -123,7 +127,7 @@ Itt amúgy mindegyikről lehet írni mennyi idő, vagy erőforrásokról (comput
 | # | Mérés | Robot | Paraméterek | Mi esik ki belőle? |
 |-|-|-|-|-|
 | 1 | baseline | waffle | nav2 default x 100 | alap paraméterekkel milyen a szórása |
-| 1.a | grid | waffle | nav2 default x kritik * 100 | milyen hatással vannak a kritikek -> jó sokféle plot|
+| 1.a | grid | waffle | nav2 default x kritik * 100 | milyen hatással vannak a kritikek -> jó sokféle plot |
 | 1.b | random | waffle | random x SOK | mennyire találja el a legjobbat |
 | 1.c | bayesian | waffle | durranjon | (hihihaha az előzőek eredményeit már lehet használni a paramétertérhez szóval lehet kevesebb szimut kell nyomni) |
 | 2 | baseline | burger | nav2 default x 100 | szórása |
