@@ -14,14 +14,21 @@
 ---
 
 ## 1. fejezet: Bevezetés
+- pár mondatban miről fog szólni, mit csináltam
 ### 1.1 Autonóm navigáció kihívásai
+- 2 mondat
 #### 1.1.1 Általános probléma bemutatása
+- A->B probléma
 #### 1.1.2 Implementáció és keretrendszer problémája
-#### 1.1.3 Specifikus implementációk problémája
+- becsomagolva ros2 és nav2ben jó de rossz is
+#### 1.1.3 Specifikus megoldások problémája
+- mi van akkor ha el kell térni bizonyos funkciókhoz
 #### 1.1.4 Időigényesség és szimuláció
+- paramétert optimalizálni sok idő
 #### 1.1.5 Navigációs rendszer
-### 1.2 Kihívások megoldása
-### 1.3 Motiváció
+- általánosan a navigációról (planner, controller stb.)
+### 1.2 Motiváció
+### 1.3 Kihívások megoldása
 ### 1.4 A diplomamunka célkitűzései
 #### 1.4.1 Eszköz fejlesztése a MPPI szabályzó hangolásához
 - legyen mérhető, metricák alapján értékelhető
@@ -78,15 +85,15 @@ https://gazebosim.org/features
 https://docs.nav2.org/configuration/packages/configuring-amcl.html
 ### 2.2 Robotmodellek és szabályzók
 #### 2.2.1 Differenciálhajtású robotok
-#### 2.2.2 Model Predictive Control (MPC)
-### 2.3 MPPI szabályzó
+### 2.3 Model Predictive Control (MPC)
+### 2.4 MPPI szabályzó
 - leírás
 - képletek
-### 2.4 Optimalizációs eljárások
-#### 2.4.1 Random search
-#### 2.4.2 Grid search
-#### 2.4.3 Bayesian optimization
-### 2.5 Docker
+### 2.5 Optimalizációs eljárások
+#### 2.5.1 Random search
+#### 2.5.2 Grid search
+#### 2.5.3 Bayesian optimization
+### 2.6 Docker
 - miért hasznos
 - elkülönített környezet - ros és python csomagok
 - gazebo külön port
@@ -111,18 +118,19 @@ https://docs.nav2.org/configuration/packages/configuring-amcl.html
 
 ---
 
-### 4. fejezet: Optimalizációs eljárások megvalósítása
-#### 4.1 Optimalizációs folyamatok
+## 4. fejezet: Optimalizációs eljárások megvalósítása
+### 4.1 Optimalizációs folyamatok
 - Input és output paraméterek definiálása.
 - Értékelési függvények (score function) megtervezése:
   - Idő, költségek, útvonal-eltérés, akadályoktól való távolság.
-#### 4.2 Optimalizációs eljárások
-#### 4.2.1 Random search
+### 4.2 Optimalizációs eljárások
+### 4.2.1 Random search
 - egyszerű implementáció, időigény.
-#### 4.2.2. Grid search
+### 4.2.2. Grid search
 - paraméterfüggőségek vizsgálata.
-#### 4.2.3 Bayesian optimization
+### 4.2.3 Bayesian optimization
 - könyvtárak és eredmények összehasonlítása.
+### 4.3 Score függvények meghatározása
 
 ---
 
