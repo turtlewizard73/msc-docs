@@ -1,7 +1,7 @@
 TODO: get https://design.ros2.org links for all the concepts
 
 ### 2.1 ROS 2
-A ROS (Robot Operating System) egy nyílt forráskódú middleware, robotikai keretrendszer. Nem teljes értékű operációs rendszer, ahogy a nevéből gondolni lehetne, hanem a robotfejlesztéshez szükséges szoftverkeretrendszerek halmaza. A munkám során ROS 2-őt használtam, ami a ROS következő generációja.
+A ROS (Robot Operating System) egy nyílt forráskódú middleware, robotikai keretrendszer. Nem teljes értékű operációs rendszer, ahogy a nevéből gondolni lehetne, hanem a robotfejlesztéshez szükséges szoftverkeretrendszerek halmaza. A munkám során ROS 2 Humble verzióját használtam, ezért a fejezetben a ROS 2 funkcióit és koncepciót ennek a verziónak megfelelően mutatom be.
 https://en.wikipedia.org/wiki/Robot_Operating_System
 
 Egy továbbfejlesztett változáata, amelyet a modern robotika követelményeinek figyelembevételével terveztek újra. a Főbb különbségei közé tartozik a valós idejű működés támogatása, a jobb biztonsági és több szálú működés képességei, valamint a DDS (Data Distribution Service) használata a belső üzenetküldéshez, kommunikációhoz. Míg a ROS 1 a Master-Slave architektúrát használja, addig a ROS 2 a Data Distribution Service (DDS) rendszert alkalmazza, amely nagyobb megbízhatóságot, alacsonyabb késleltetést és jobb skálázhatóságot kínál. A DDS elosztott jellege lehetővé teszi a kommunikációs hibák minimalizálását, valamint támogatja a valós idejű rendszereket. Továbbá, míg a ROS 1-ben két külön könyvtár (roscpp és rospy) létezett, addig a ROS 2 központi, C nyelven íródott rcl könyvtárat használ, amely több programozási nyelvet is támogat, például Python, C++, Java és C#. A ROS 2 ezenkívül jelentős fejlődést hozott az adatformátum kezelésében is, amely több rugalmasságot kínál a szerializálás teréna belső folyamatok kommunikációjában. A ROS 2 új funkciói közé tartozik a QoS (Minőségbiztosítás) támogatása. Ez magában foglalja az üzenetek megbízhatóságára, határidejére és prioritására vonatkozó beállításokat, amelyek biztosíthatják, hogy a kritikus üzenetek időben kézbesítésre kerüljenek. A többszálú végrehajtás lehetősége node-ok és azok belső folyamatainek párhuzamos futását teszi lehetővé. így jobban ki tudja használni a modern többmagos processzorokat, mint a ROS 1. Mindezek hozzájárulnak a valós idejű feldolgozás javításához, így sokkal jobban alkalmas a komplex, ipari robotikai alkalmazások számára.
@@ -56,19 +56,106 @@ https://docs.ros.org/en/foxy/Concepts/About-Composition.html
 https://docs.ros.org/en/foxy/Tutorials/Demos/Intra-Process-Communication.html
 
 ### 2.2 Gazebo
-https://gazebosim.org/features
-- robot and world models
-  - ode: http://ode.org/ode-latest-userguide.html
-- sensors and noise models
-- plugins - interaction trough topics
+A Gazebo egy népszerű nyílt forráskódú szimulációs környezet, amelyet robotikai alkalmazások fejlesztéséhez és teszteléséhez használnak. 3D grafikai megjelenítést, fizikai szimulációt, valamint szenzor- és robot leíró modelleket kínál. Lehetővé teszi, hogy valós világot imitáló környezetekben robotot tesztejünk anélkül, hogy fizikai hardvert kellene használniuk. Támogatja a különböző robotikai központi rendszerek, például a ROS 2 integrációját, így valósághű szimulációt nyújt mind a vezérlés, mind a kommunikáció szempontjából.
+
+A Gazebóban a szimulációs környezetet az úgynevezett world fájlok írják le, amelyek a világ statikus elemeit (például tereptárgyak, falak vagy akadályok) és dinamikus elemeit (pl. robotmodellek, mozgó dinamukis akadályok) definiálják. A világfájlok általában .world kiterjesztéssel rendelkeznek, és az SDF (Simulation Description Format) vagy URDF (Unified Robot Description Format) nyelvet használják a környezet leírására. A szimulációban definiálhatóak a fizikai motor típusa, az alapértelmezett, amit én is használtam az ODE (Open Dynamics Engine). Word fájlokban a fizikai motor kapcsán definiálhatóak azok paraméterei ilyen az ODE esetében a "max_step_size", ami a lépésköz időtartamát jelenti. A "real_time_update_rate" határozza meg, milyen gyakorisággal halad előre a szimulációs idő lépésenként valós időben. Alapértelmezetten a "max_step_size" 0.001 másodperc, a "real_time_update_rate" pedig 1000 Hz, szóval kettőt megszorozva egymással egyet kapunk, ami azt jelenti, hogy a szimuláció, ha a megfelelő erőforrások és számítási kapacitás rendelkezésre áll, valós időnek megfelően halad.
+https://classic.gazebosim.org/tutorials?tut=build_world&cat=build_world
+https://classic.gazebosim.org/tutorials?tut=physics_params
+http://ode.org/ode-latest-userguide.html
+
+A robotmodelleket a Gazebóban általában URDF, SDF vagy XACRO fájlok segítségével írják le. Egy robotmodell főbb elemei közé tartoznak a "link"-ek és a "joint"-ok. A link-ek a robot fizikai komponenseit, például a testét vagy karjait reprezentálják, míg a joint-ok a link-ek közötti mozgásokat határozzák meg, például forgó vagy csúszó kapcsolatokat. A modellekhez anyagokat és színeket is rendelhetünk, amelyek a vizuális megjelenést adnak. Ezenkívül dinamikus tulajdonságok, például a tömeg, a súrlódás és a tehetetlenségi mátrix is definiálható, amelyek a valósághű fizikai szimulációhoz szükségesek.
+https://classic.gazebosim.org/tutorials?tut=build_model&cat=build_robot
+
+A Gazebóban a robotok szenzorokkal szerelhetők fel, amelyek valósághű adatokat szimulálnak a környezetről. A szenzorok, például lézerszkennerek (Lidar), kamerák, inerciális mérőegységek (IMU) vagy GPS, pluginok segítségével integrálhatók a robotmodellbe. Ezek a pluginok definiálják a szenzorok működését, például a látómezőt, a mintavételezési frekvenciát vagy a zajmodelljüket. A szimuláció során a szenzoradatok valós idejű információkat szolgáltatnak, amelyeket a robot vezérlőrendszere felhasználhat például navigációhoz, térképezéshez vagy akadályelkerüléshez.
+https://classic.gazebosim.org/tutorials?tut=sensor_noise&cat=sensors
+
+A ROS 2 és a Gazebo közötti kommunikáció általában topicokon keresztül valósul meg. A Gazebo ROS 2 pluginjai lehetővé teszik, hogy a szimulált robotok ROS 2 node-okként viselkedjenek, amelyek publikálnak vagy feliratkoznak topicokra. Például egy szimulált kamera pluginja képes képkockákat publikálni egy beállított topicra, amelyet egy ROS 2 node dolgozhat fel. Hasonlóképpen, a robot vezérléséhez szükséges parancsok, például sebességparancsok, a Gazebo felé is elküldhetők. Ez a szoros integráció lehetővé teszi, hogy a fejlesztők a szimulált környezetben ugyanazokat az algoritmusokat és vezérlőket használják, mint a valós robotokon, minimalizálva a valós és a szimulált környezet közötti eltéréseket.
+https://classic.gazebosim.org/tutorials?tut=ros_overview&cat=connect_ros
+
 ### 2.3 Nav2
-- core concepts https://docs.nav2.org/concepts/index.html
-- frames: https://www.ros.org/reps/rep-0105.html
-- costmap representation
-- odometry
-#### 2.3.1 Planners
-#### 2.3.2 Controllers
-#### 2.3.3 Costmaps
+A Nav2 (Navigation 2) a ROS 2 navigációs keretrendszere, ROS 2-es csomagok összessége, amely robotok autonóm mozgását teszi lehetővé. Lehetővé teszi a robot számára, hogy egy térképen egy kiindulási pontból egy megadott célponthoz navigáljon, miközben akadályokat kerül ki. A Nav2 különféle algoritmusokat kínál, például útvonaltervezést, térképezést, helymeghatározást és akadályelkerülést. Moduláris felépítésének köszönhetően rugalmasan testreszabható, így különböző robotplatformokon használható. A rendszer főbb komponensei közé tartozik a globális és lokális útvonaltervező, a helymeghatározás (AMCL), valamint a vezérlési algoritmusok, például az MPPI és a DWB. A Nav2 kompatibilis a Gazebo szimulátorral és valós robotokkal egyaránt, és ROS 2 interfészeket, például topic-okat, service-eket és action-öket használ a kommunikációhoz. A fejlesztők széles körben alkalmazhatják beltéri és kültéri navigációs feladatokhoz.
+https://docs.nav2.org/concepts/index.html
+
+A navigációs feladatok központi elemei a útvonal tervezők (planner-ek) és a vezérlők (controller-ek), amelyek a robot mozgásának megtervezését és irányítását végzik. A rendszer hibakezelési képességének biztosítása érdekében helyreállítási mechanizmusokat (recoverie-k) alkalmaznak, amelyek célja a robot kimozdítása egy kedvezőtlen helyzetből vagy különféle problémák kezelése. További útvonal minőségi javítás érdekében az útvonaltervek finomhangolására smoother-ek használhatók.
+https://docs.nav2.org/concepts/index.html#navigation-servers
+
+A Nav2 egy kiterjedt nyílt forráskódú szoftvercsomag, amely folyamatosan fejlődik a ROS 2-es közösség hozzájárulásának köszönhetően. Ebben a fejezetben szintén, mint a ez eddeigiekben a Nav2 azon koncepcióira fogok kitérni is bővebben elemezni, melyek a diplomamunka során használtam és fontosak a megértés szempontjából.
+
+#### 2.3.1 Costmap
+TODO: kép https://wiki.ros.org/costmap_2d
+A costmap a robot környezetének térbeli reprezentációja, amelyet a navigációs rendszerek használnak az útvonaltervezéshez és mozgásvezérléshez. Ez egy kétdimenziós, szabályos rácsszerkezet (grid), ahol az egyes cellák bizonyos költségeket reprezentálnak, például ismeretlen, szabad, elfoglalt vagy "felfújt" költség értékekkel. A "felfújás" (inflation) folyamata során az akadályokkal elfoglalt cellák költségeit továbbítják a környező cellákba, ahol a költség a távolság növekedésével csökken. Ez lehetővé teszi, hogy a robot elkerülje a veszélyes területeket, miközben figyelembe veszi saját méretét és a felhasználó által megadott preferenciákat, például tiltott vagy kevésbé preferált zónák definiálásával.
+https://wiki.ros.org/costmap_2d
+
+Egy costmap lehet globális vagy lokális, attól függően, hogy a teljes térképezett környezetet vagy a robot egy lokális környezetét reprezentálja. Általánosan a globális útvonal tervezés a globális costmap-en történik, a dinamikus akadályelkerülés és mozgásszabályozás a lokális costmap-en. A costmap-ek különféle rétegekből állhatnak össze, melyek külön külön a rácspontokat megjelölhetik szabad, foglalt stb. állapotokkal. Majd ezek a rétegek összeadódnak, így kapjuk meg a teljes costmap-et. Rétegek lehetnek statikusak, mondjuk egy előre elkészített térkép reprezentáció a környezetről vagy dinamukusan változó akadályok szenzorok adataiból kinyert és feldolgozott reprezentációi. Ilyen rétegek kezelek 2 vagy 3 dimenziós szenzoradatokat például LIDAR, RADAR, szonár, mélységérzékelők vagy kamerák által gyűjtött adatokat dolgoznak fel, tárolnak és menedzselnek. Ezeket a rétegeket a "pluginlib" segítségével lehet betölteni, implementálni, lehetővé téve a testreszabást és a fejlesztő által szükséges előfeldolgozási lépések integrálását.
+https://github.com/ros-navigation/navigation2/tree/main/nav2_navfn_planner
+
+#### 2.3.2 Planners
+TODO: kép egy global planről
+A planner-ek elsődleges feladata a robot útvonalának megtervezése egy adott célfunkció teljesítése érdekében. Példák a tipikus tervezési feladatokra: egy adott célt megközelítő útvonal meghatározása, vagy egy teljes terület lefedésére irányuló pálya megtervezése. A Nav2-ben a globális útvonaltervezők (global planners) a robot teljes útvonalát tervezik meg a kiindulási ponttól a célpontig. Egy térképen a környezet szenzorokból nyert adatiból feldolgozott virtuális megjelenítésén terveznek. Többféle algoritmust kínál a Nav2, amelyeket plugin-ként lehet a "planner_server" node-ba betölteni és akár futásidőben váltani köztük. Az összesnek általános feladatai: legrövidebb út kiszámítása, teljes pálya generálása. Ezek a célok definiálják az optimális pályát általában, de nem kizárólag. A diplomamunkának nem volt célja különböző planner-ek összehasonlítása, ezért az "alap" példaként biztosított NavfnPlanner-t használtam, általánosságban elmondható róla, hogy egy kifejezetten stabil A* vagy Dijkstra opcionálisan konfigurálható algoritmusok valamelyikét használja, robotot alakját körrel közelíti és így tervezi meg a pályát a globális costmap-en.
+https://docs.nav2.org/concepts/index.html#planners
+https://docs.nav2.org/plugins/index.html#planners
+https://github.com/ros-navigation/navigation2/tree/main/nav2_navfn_planner
+
+#### 2.3.3 Controller-ek
+A vezérlők (controller-ek) a Nav2 rendszerben a robot irányításáért felelős komponensek, amelyek a globálisan kiszámított útvonalak követését vagy lokális feladatok végrehajtását biztosítják. Ezek a Nav2-ben a controller_server által kerülnek kezelése, amely egy olyan kiszolgáló, amely különböző vezérlési algoritmusokat tartalmazhat plugin formájában.
+
+A controller hozzáfér a helyi környezet reprezentációjához a lokális costmap-en keresztül és megpróbál kinematikailag megvalósítható vezérlési parancsokat előállítani. A controller-ek működése iteratív: egyes algoritmusok a robot aktuális helyzetéből kiindulva, egy előre vetített pályát számolnak minden frissítés során, hogy biztosítsák a lokálisan optimális és megvalósítható irányítást. Az irányítás egy topic-ok jelenik meg, megszokottan a "cmd_vel" topic-on, ahonnan a robot motor interfészének olvassa, majd továbbítja például a motorok felé.
+
 #### 2.3.4 Navigator API
-### 2.4 Lokalizáció - AMCL
+TODO
+
+### 2.4 MPPI Nav2-ben
+Az egyik Nav2-ben plugin-ként megvalósított szabályzó az MPPI (Model Predictive Path Integral Controller)
+TODO: ezt átolvasi mppi utáni kutatás után
+A Nav2 MPPI Controller (Model Predictive Path Integral Controller) a Nav2 stack legújabb prediktív vezérlő algoritmusa, amely a TEB és hagyományos MPC útvonal-követési vezérlők utódjaként jelent meg. Ez egy mintavételezés-alapú megközelítést alkalmaz az optimális pályák kiválasztására, iteratív optimalizálást végezve a vezérlési iterációk között. A vezérlő kiegészíthető és testreszabható plugin-alapú objektívfüggvények segítségével, amelyek különböző viselkedéseket és attribútumokat támogathatnak.
+Fő jellemzők:
+
+Támogatja a differenciális hajtású, omnidirekcionális és Ackermann-kormányzású robotokat.
+A vezérlő akár 50 Hz-es vagy nagyobb frissítési sebességgel képes futni közepes teljesítményű processzorokon (pl. 4. generációs Intel i5).
+Nem konvex és nem differenciálható objektívfüggvények támogatása, ami jelentős tervezői rugalmasságot biztosít.
+
+Működési elv:
+Az MPPI algoritmus egy modell-alapú prediktív vezérlő (MPC) variáns, amely iteratív megközelítéssel találja meg a robot számára optimális sebességparancsokat. Az algoritmus lépései:
+
+Kezdeti állapot: Az előző időlépés legjobb vezérlési megoldása és a robot aktuális állapota alapján történik a vezérlés.
+Perturbációk alkalmazása: Egy Gauss-eloszlásból véletlenszerűen mintavételezett perturbációk kerülnek a vezérlési parancsokra.
+Előre szimuláció: Ezeket a zavarokkal módosított vezérlési parancsokat a robot mozgásmodelljén keresztül előre szimulálja, amely különböző pályákat generál.
+Pontozás: A generált pályákat egyedi, plugin-alapú kritikus függvények segítségével kiértékeli, és megtalálja a legjobb pályát.
+Vezérlési döntés: A pályák pontszámait egy softmax függvény segítségével súlyozza, és ennek alapján választja ki az aktuális vezérlési parancsot.
+Iteráció: Az optimalizálási folyamatot többször megismétli, amíg a vezérlési parancsok konvergenciája elérhető.
+
+Előnyök:
+Az MPPI Controller lehetővé teszi komplex és nem hagyományos viselkedések implementálását, mivel az objektívfüggvények tervezői szabad kezet kapnak a nem konvex és nem differenciálható szabályok használatában. Ez az innovatív megközelítés rugalmasabbá teszi a vezérlőt kutatási és ipari környezetben egyaránt.
+
+#### 2.4.x MPPI Controller paraméterei
+Az alábbiakban a szabályzó működésének fontosabb paraméterei:
+
+motion_model: pályatervezéshez használ robotmodell (differenciál hajtású, omnidirekcionális, ackermann)
+critics: lista a használni kívánt critic függvényekről
+iteration_count: az iterációk száma egy vezérlési cikluson belül
+batch_size: véletlenszerűen generált vezérlési parancsok száma egy iteráción belül
+time_steps: a jövőbeli állapotok száma, amelyeket a vezérlési parancsokkal előre szimulál
+model_dt: szimulált állapotok közötti időlépés
+vx_std: a sebesség szórása robot haladási irányával megegyező irányban
+vy_std: a sebesség szórása robot oldalirányú irányával megegyező irányban (csak omnidirekcionális robotok esetén)
+wz_std: a szögsebesség szórása (robot z tengelye körül)
+vx_max: a maximális haladási sebesség
+vy_max: a maximális oldalirányú sebesség (csak omnidirekcionális robotok esetén)
+wz_max: a maximális szögsebesség
+ax_max: a maximális gyorsulás robot haladási irányában
+ay_max: a maximális gyorsulás robot oldalirányú irányában (csak omnidirekcionális robotok esetén)
+temperature: a generált vezérlési parancsok összegzésének mértéke, minél közelebb van 0-hoz, annál többet vesz számításba a kisebb értékű vezérlési parancsokból
+gamma: komplex paraméter (mely módosítását nem javasolja a leírás), energiafelhasználás szempontjából fontos
+retry_attempt_limit: a próbálkozások száma, amelyeket a végrehajtható trajektória megtalálására végeznek sikertelenség esetén, mielőtt teljes hibát jeleznének
+reset_period: inaktivitási időszak, amely után a szabályzó újraindul
+regenerate_noises: a zajok újragenerálásának módosítására szolgáló paraméter
+
+https://docs.nav2.org/configuration/packages/configuring-mppic.html
+
+
+### 2.5 Odometria
+- frames: https://www.ros.org/reps/rep-0105.html
+
+### 2.5 Lokalizáció - AMCL
 https://docs.nav2.org/configuration/packages/configuring-amcl.h
+
