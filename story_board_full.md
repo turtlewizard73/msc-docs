@@ -12,7 +12,7 @@
 5. Készítsen összefoglalót a munkájáról!
 
 ---
-
+KÉSZ: md
 ## 1. fejezet: Bevezetés
 - pár mondatban miről fog szólni, mit csináltam
 ### 1.1 Autonóm navigáció kihívásai
@@ -45,54 +45,48 @@
 ---
 
 ## 2. fejezet: Irodalmi áttekintés
+(irodalom part1)
+### 2.1 Robotok mechanikai felépítése
+### 2.2 Mobil alappal rendelkező robotok
+### 2.3 Mobil robotok kinematikai modellje
+### 2.4 Differenciál hajtású robotok
+TODO: képletek
+
+TODO: fullosan, források megvannak
+### 2.3 Irányítások áttekintése a robotnavigációban
+### 2.4 Model prediktív szabályozás
+### 2.5 MPPI szabályzó
+#### 2.5.2 Eltérések MPC-től
+#### 2.5.2 Megvalósítás NAV 2-ben
+
+(irodalom part 2)
+KÉSZ: md
 ### 2.1 ROS 2
-- basics
-- nodes
-#### 2.1.1 ROS 2 client libraries: rclpy
-https://docs.ros.org/en/foxy/Concepts/About-ROS-2-Client-Libraries.html#the-rclpy-package
-#### 2.1.2 Interfészek (msg, srv)
-https://docs.ros.org/en/foxy/Concepts/About-ROS-Interfaces.html
-- msg - pub-sub
-- srv - request-response
-- action - goal-feedback-result
-#### 2.1.3 Paraméterek
-https://docs.ros.org/en/foxy/Concepts/About-ROS-2-Parameters.html
-- parameter server
-- node level
-- launch level
-- yaml level
-- manipulating at runtime
-#### 2.1.1 Executors
-https://docs.ros.org/en/foxy/Concepts/About-Executors.html
-- node handling - threads
-- callback groups
+#### 2.1.1 Modularitás és node-ok
+#### 2.1.2 ROS 2 client library: rclpy
+#### 2.1.3 Launch fájlok
+#### 2.1.4 Interfészek
+#### 2.1.5 Paraméterek
+#### 2.1.6 Executors
+#### 2.1.7 Composition
 ### 2.2 Gazebo
-https://gazebosim.org/features
-- robot and world models
-  - ode: http://ode.org/ode-latest-userguide.html
-- sensors and noise models
-- plugins - interaction trough topics
 ### 2.3 Nav2
-- core concepts https://docs.nav2.org/concepts/index.html
-- frames: https://www.ros.org/reps/rep-0105.html
-- costmap representation
-- odometry
-#### 2.3.1 Planners
-#### 2.3.2 Controllers
-#### 2.3.3 Costmaps
+#### 2.3.1 Costmap
+#### 2.3.2 Planners
+#### 2.3.3 Controller-ek
 #### 2.3.4 Navigator API
-### 2.4 Lokalizáció - AMCL
-https://docs.nav2.org/configuration/packages/configuring-amcl.html
-### 2.2 Robotmodellek és szabályzók
-#### 2.2.1 Differenciálhajtású robotok
-### 2.3 Model Predictive Control (MPC)
-### 2.4 MPPI szabályzó
-- leírás
-- képletek
+### 2.4 MPPI Nav2-ben
+#### 2.4.x MPPI Controller paraméterei
+TODO: giga formázások
+### 2.5 Odometria és TF
+### 2.5 Lokalizáció - AMCL
+
+(irodalom part 3)
 ### 2.5 Optimalizációs eljárások
 #### 2.5.1 Random search
 #### 2.5.2 Grid search
 #### 2.5.3 Bayesian optimization
+
 ### 2.6 Docker
 - miért hasznos
 - elkülönített környezet - ros és python csomagok
