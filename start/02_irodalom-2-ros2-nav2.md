@@ -102,7 +102,8 @@ A vezérlők (controller-ek) a Nav2 rendszerben a robot irányításáért felel
 A controller hozzáfér a helyi környezet reprezentációjához a lokális costmap-en keresztül és megpróbál kinematikailag megvalósítható vezérlési parancsokat előállítani. A controller-ek működése iteratív: egyes algoritmusok a robot aktuális helyzetéből kiindulva, egy előre vetített pályát számolnak minden frissítés során, hogy biztosítsák a lokálisan optimális és megvalósítható irányítást. Az irányítás egy topic-ok jelenik meg, megszokottan a "cmd_vel" topic-on, ahonnan a robot motor interfészének olvassa, majd továbbítja például a motorok felé.
 
 #### 2.3.4 Navigator API
-TODO
+A Nav2 kínál egy "nav2_simple_commander" névre hallgató Python könyvtárat, mely gyakorlatilag egy API a Nav2-es rendszerhez, mamin keresztül interakcióba léphetünk az épen futó node-okkal. Ez az API "elrejti" a ROS 2 és a Nav2 komplexitásait, így segítve, hogy kizárólag egy alkalmazás fejlesztésére koncentrálhasson a felhasználó. Biztosítja az összes szükséges funkciót a navigációs rendszer kezeléséhez, miközben lehetőséget ad arra, hogy a fejlesztők saját igényeik szerint konfigurálják a Nav2-t az egyéni pluginjaikkal. Az API függvényei egy szálon futattve nem blokkolnak, ezért végrehajtásuk közben lehetőség van visszajelzések feldolgozására és hibakezelésre. Ez különösen hasznos, amikor a robot mozgása közben valós idejű adatok elemzésére vagy a rendszer vezérlésére van szükség. Támogatja a kiadott utasítások preemptív megszakítását, és feladatok közötti váltáskor az explicit megszakítást. API-n keresztül elérhető funkciók, lényeges, de nem teljes felsorolása: inicializálási pozíció megadása, célpontra navigálás elindítása, navigáció állapotának és eredményének lekérése, útvonal követés indítása, costmap-ekkel való interakció és térképváltoztatás. Ezek-et a funkciókat a diplomamunka során is hanszáltam, működésükről a megértést segítve tervezés/fejlesztés fejezetben később részletesen írok.
+https://docs.nav2.org/commander_api/index.html
 
 ### 2.4 MPPI Nav2-ben
 Az egyik Nav2-ben plugin-ként megvalósított szabályzó az MPPI (Model Predictive Path Integral Controller)
@@ -153,9 +154,22 @@ regenerate_noises: a zajok újragenerálásának módosítására szolgáló par
 https://docs.nav2.org/configuration/packages/configuring-mppic.html
 
 
-### 2.5 Odometria
-- frames: https://www.ros.org/reps/rep-0105.html
+### 2.5 Odometria és TF
+Eddig sokszor volt szó a robot pozíciójáról és említve volt, a Gazebo fejezetben, hogyan hozható létre robot modell szenzorokkal. Ezekhez köthető az odometria (odometry) és koordináta-transzformációk rendszere (tf). A különböző koordináta-rendszerek és azok közötti átalakítások biztosítják, hogy a robot megfelelően érzékelje és kövesse a mozgását a környezetében. Három alapvető koordináta-rendszert használ a ROS 2:
+
+"base_link": A robothoz kötött koordináta rendszer, mely vele együtt mozog. Virtuálisan definiált, tetszőleges pozícióban és orientációban lehet. A robot modell felépítésénél a base_link koordináta rendszeréhez képest kell definiálni a robotra szerelt szenzorokat és aktuátorokat, vagy a robot testét.
+
+"odom": A világhoz rögzített globális koordináta rendszer. Az odom rendszerben a robot pozíciója idővel eltolódhat, ami miatt hosszú távon nem ideális globális referenciaként. Azonban a robot pozíciója az odom koordináta-rendszerben folytonosan változik, ugrások nélkül. Az odometria a robot relatív elmozdulását jelenti (például kerék-odometria, vizuális odometria vagy inerciális mérési egység) az odom rendszert használja rövid távú lokalizációhoz.
+
+"map": Szintén globális környezethez, világhoz rögzített referencia, amelynek Z-tengelye felfelé mutat. A map koordináta rendszerben a robot pozíciójának nincs összeadódó hibája, mint az odom rendszerben. Viszont nem biztosít folyamatos pozícióváltoztatást, mert a lokalizáció hatására, szenzoradatok frissülése miatt időnként ugrások léphetnek fel a pozíciókban.
+
+A robot navigációjában különböző koordináta-rendszerek között transzformációkra van szükség, hogy biztosítsák a helyes pozicionálást és mozgást. A transzformációk biztosítják a különböző koordináta-rendszerek közötti átváltást, például az odom, base_link és map rendszerek között. Az transzformációk szükségesek, ha egy szenzor által, saját koordináta rendszerében érzékelt tereptárgyat akarunk a robot koordináta rendszerében elhelyezni, hogy a kikerülés manőverét megtervezzük. A két legfontosabb transzformáció az odom-ot base_link-kel összekötő és a map-ot az odom-mal összekötő.
+TODO: kép map->odom->base_link. Az előbbit az odometria forrásokból számolt transzformáció adja, az utóbbit aa lokalizációs alrendszer biztosítja.
+https://www.ros.org/reps/rep-0105.html
+https://wiki.ros.org/navigation/Tutorials/RobotSetup/Odom
+
 
 ### 2.5 Lokalizáció - AMCL
+Már sokszor említettem a lokalizációt aminek a szerepe, hogy adott globális koordináta rendszerben elhelyezze a robotot. A diplomamunka során futtatott szimulációkhoz Lidar alapú AMCL (Adaptive Monte Carlo Localization-t) használtam. Az AMCL egy statisztikai alapú lokalizációs algoritmus, amely a robot pozícióját és orientációját becsüli a térkép és a szenzoradatok alapján. Az AMCL a Monte Carlo módszert alkalmazza a robot helyzetének valószínűségi eloszlásának közelítésére, amelyet a szenzoradatok folyamatosan frissítenek. Az algoritmus a robot pozícióját egy többdimenziós Gauss-eloszlásként reprezentálja, amelynek középpontja a becsült helyzet, a szórása pedig a bizonytalanságot jelzi.
 https://docs.nav2.org/configuration/packages/configuring-amcl.h
 
