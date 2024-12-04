@@ -157,12 +157,17 @@
 \cleardoublepage
 \pagenumbering{arabic}
 %TODO Importáld a saját fejezeteidet [Import your own content]
-\include{chapters/introduction}      % Bevezetés
-\include{chapters/latex-tools}       % 2. fejezet
-\include{chapters/thesis-format}     % 3. fejezet
-\include{chapters/template-usage}    % 4. fejezet
-\include{chapters/summary}           % Összefoglalás
+% \include{chapters/introduction}      % Bevezetés
+% \include{chapters/latex-tools}       % 2. fejezet
+% \include{chapters/thesis-format}     % 3. fejezet
+% \include{chapters/template-usage}    % 4. fejezet
+% \include{chapters/summary}           % Összefoglalás
 
+
+% ----------------------------------------------------------
+% my chapters
+\include{mychapters/01_bevezetes}
+\include{mychapters/02_irodalom-1-models-mppi}
 
 % Bibliográfia [Bibliography]
 \addcontentsline{toc}{chapter}{\bibname}
@@ -178,7 +183,7 @@
 
 % Függelék és mellékletek [Appendices]
 %\excludeFromLocAndLot % A következő ábrákat és a táblázatokat hagyja ki a jegyzékből
-                      % [Exclude following figures and tables from List Of Figures/Tables]
+% [Exclude following figures and tables from List Of Figures/Tables]
 
 \include{chapters/appendices}        % Függelék - opcionális
 \include{chapters/annexes}           % Mellékletek
