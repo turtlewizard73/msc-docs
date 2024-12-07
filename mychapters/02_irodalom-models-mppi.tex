@@ -2,6 +2,30 @@
 \chapter{Irodalmi áttekintés}
 %----------------------------------------------------------------------------
 
+\section{Mobil robotok irányítása}
+A mobil robotok irányítása alapvető szerepet játszik az autonóm rendszerek hatékony működésében. Az autonóm mobil robotok  alkalmazási területeik két részre bonthatók, az egyik az olyan feladatok, amelyek nagy precizitást igényelnek és egy embernél gyorsabban, pontosabban szükségesek elvégezni, a másik a könnyen autómatizálható feladatok, ahol robotok alkalmazásával jelentős költségmegtakarítás érhető el. Például:
+
+\begin{itemize}
+    \item \textbf{Logisztika}: Raktári robotok optimalizálják az áruk szállítását, csökkentve az emberi erőforrás szükségletét és növelve a hatékonyságot.
+    \item \textbf{Egészségügy}: Autonóm robotok biztosítják a steril környezetet és az időérzékeny anyagok szállítását kórházakban.
+    \item \textbf{Mezőgazdaság}: Robotok segítenek a precíziós gazdálkodásban, például a növények állapotának monitorozásában vagy a gyomirtásban.
+\end{itemize}
+
+Az autonóm mobil robotok sikere nagyban függ a vezérlési rendszer minőségétől. Egy hatékony irányítórendszer:
+\begin{enumerate}
+    \item \textbf{Pontosan vezérli a robot mozgását} a megadott pályán.
+    \item \textbf{Akadályokat kerül el biztonságosan}, az emberi és környezeti tényezőket figyelembe véve.
+    \item \textbf{Döntéseket hoz valós időben} a változó környezetben.
+    \item \textbf{Energiahatékony} működést biztosít, ami különösen fontos akkumulátorról működő rendszerek esetén.
+\end{enumerate}
+
+A mobil robotok irányítása különösen bonyolult, mivel figyelembe kell venni:
+\begin{itemize}
+    \item a robot kinematikai és dinamikai modelljét,
+    \item a környezeti bizonytalanságokat, például dinamikus akadályokat,
+    \item a rendszer korlátait, mint például a szenzorok pontosságát és a robot fizikáját.
+\end{itemize}
+
 \section{Robotok mechanikai felépítése}
 Robotok mechanikai felépítésük alapján kétféle csoportra oszthatók: térbeli mozgásra képes és mozgásra nem képes alappal rendelkezők. A fix alaphoz kötött robotok geometriai felépítése leírható merev testek (links) és csuklók (joints) kapcsolatainak sorával, melyek egy adott munkatérben képesek mozogni. A mozgó alappal rendelkező robotok a térben helyet tudnak változtatni. Mechanikai szempontból egy vagy több merev testből állhatnak, melyekhez csatlakozik egy elmozdulásra képes rendszer például kerekek. \cite{siciliano2010robotics}
 
@@ -45,7 +69,7 @@ A diplomamunka során használt robotok közül mindegyik ebbe a kategóriába e
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=75mm, keepaspectratio]{figures/025_diff_model.png}
-    \caption{Differenciál hajtűsú robot modell \cite{siciliano2010robotics}}
+    \caption{Differenciál hajtású robot modell \cite{siciliano2010robotics}}
     \label{fig:025_diff_model}
 \end{figure}
 

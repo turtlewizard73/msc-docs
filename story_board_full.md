@@ -154,3 +154,76 @@ TODO: giga formázások
 - Az alkalmazott Python csomagok listája (pl. NumPy, SciPy, Scikit-learn).
 - Ros2 paraméterek és kritikusok részletei (Nav2 API).
 - Benchmark eredmények táblázatos és grafikus formában.
+
+
+---
+
+
+# Mobil robot irányítás
+
+## 1. Bevezetés
+- **Miért fontos a mobil robotok irányítása?**
+  - Autonóm robotok szerepe különböző alkalmazásokban (logisztika, egészségügy, stb.).
+  - A pontos és megbízható vezérlés jelentősége a robotok autonóm működésében.
+
+## 2. Robotmodellek és vezérlésük
+### 2.1 Kinematikai modellek
+- A robotok mozgásának alapjai: kinematikai és dinamikai modellek.
+- Példák különböző típusú mobil robotokra:
+  - Differenciálhajtású robotok (pl. TurtleBot).
+  - Holonom robotok (pl. omniwheel robotok).
+  - Nonholonom robotok korlátai és vezérlésük kihívásai.
+
+### 2.2 Vezérlési problémák
+- Útvonal követése, akadályelkerülés, stabilitás biztosítása.
+- Általános vezérlési módszerek mobil robotoknál.
+
+## 3. Szabályzók mobil robotokhoz
+### 3.1 Egyszerű szabályzók
+- Proporcionális szabályozás (pl. "carrot chasing" módszer).
+- Előnyei és korlátai.
+
+### 3.2 Komplexebb szabályzók
+- Dinamikai modelleken alapuló szabályozók.
+- A PID szabályozás szerepe és alkalmazása mobil robotoknál.
+- Gyakorlati kihívások, példák (pl. nemlineáris rendszerek kezelése).
+
+## 4. Modell prediktív szabályozás (MPC)
+### 4.1 Az MPC alapjai
+- Hogyan működik az MPC?
+- Költségfüggvény, korlátok és optimalizáció szerepe.
+- Példák: ipari alkalmazások és robotvezérlés.
+
+### 4.2 MPC mobil robotoknál
+- Miért hasznos MPC mobil robotokhoz?
+- MPC alkalmazása útvonaltervezésre és akadályelkerülésre.
+- Példa algoritmus: a Linear Quadratic Regulator (LQR).
+
+### 4.3 Kihívások MPC szabályzóknál
+- Valós idejű számítási igények.
+- Környezeti bizonytalanságok kezelése.
+
+## 5. Modell prediktív pályaintegrálás (MPPI)
+### 5.1 Az MPPI alapelvei
+- Hogyan különbözik az MPPI az általános MPC-től?
+- Az MPPI alapfogalmai: sztochasztikus mintavételezés, költségfüggvény minimalizálás.
+
+### 5.2 MPPI mobil robotokhoz
+- Az MPPI előnyei mobil robotok esetében: dinamikus akadályelkerülés, rugalmasság.
+- A Nav2 MPPI implementáció bemutatása.
+
+### 5.3 Példák és alkalmazások
+- Esettanulmányok mobil robotoknál.
+- Miért válik egyre népszerűbbé az MPPI a robotikában?
+
+---
+
+## Lehetséges mélységek a fejezetekben
+- **Ábra és grafikon lehetőségek:**
+  - Kinematikai modellek ábrái.
+  - MPC és MPPI költségfüggvény összehasonlítása.
+  - Valós és szimulált pályák eredményei.
+
+- **Kód vagy pszeudokód bemutatása:**
+  - MPC és MPPI alapalgoritmusok lépéseinek illusztrálása.
+  - Egyszerű példák Pythonban.
