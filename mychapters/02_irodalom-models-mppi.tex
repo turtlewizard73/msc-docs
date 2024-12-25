@@ -165,5 +165,25 @@ A folyamatirányítás területén az MPC a gyártási folyamatok vezérléséne
 Ezek az alkalmazási példák jól mutatják, hogy az MPC mennyire sokoldalú eszköz, amely különböző területeken is képes a szabályozási problémák megoldására. Az optimalizációs képességei és a valós idejű adaptáció lehetőségei miatt az MPC számos modern irányítórendszer alapját képezi.
 
 \section{MPPI}
-- különbséges, hasonlóságok
-- képeletek
+TODO: nav2-es hivatkozás
+% https://roscon.ros.org/2023/talks/On_Use_of_Nav2_MPPI_Controller.pdf
+%https://ieeexplore.ieee.org/abstract/document/7487277
+% -> https://sci-hub.se/10.1109/icra.2016.7487277
+Az Model Predictive Path Integral (MPPI) szabályozó egy modern, mintavétel-alapú modell prediktív szabályozási algoritmus, amelyet komplex, nemlineáris rendszerek irányítására fejlesztettek ki. Az MPPI az optimalizációs és információelméleti módszerek kombinációján alapul, és hatékonyan alkalmazható valós idejű feladatok megoldására, ahol a hagyományos szabályozók nem biztosítanak elegendő rugalmasságot. Az MPPI a jövőbeli rendszerállapotok előrejelzésével és az ezekhez tartozó költségek minimalizálásával dolgozik. Az algoritmus véletlenszerűen generált irányítási pályákon keresztül vizsgálja a rendszer dinamikáját, majd az optimális pályát a költségfüggvény alapján választja ki.
+
+\begin{enumerate}
+    \item \textbf{Zaj hozzáadása az előző optimális pálya irányítási parancsaihoz:}
+    Az algoritmus véletlenszerű zajt ad az előzőleg kiszámított optimális irányítási parancsokhoz. Ez lehetővé teszi a lehetséges irányítási pályák felfedezését, és segít elkerülni a lokális optimumokat.
+
+    \item \textbf{A dinamikai modell alkalmazása és a pályák szimulációja:}
+    A zajjal módosított irányítási parancsok alapján az algoritmus szimulálja a rendszer dinamikáját, és meghatározza a lehetséges pályák sorozatát (ún. rollout trajektóriák). Ezek a trajektóriák a rendszer viselkedésének lehetséges jövőbeli állapotait modellezik.
+
+    \item \textbf{A trajektóriák értékelése költségfüggvényekkel:}
+    Minden trajektóriához hozzárendel egy költségértéket az adott költségfüggvény alapján, amely figyelembe veszi például a pályán maradást, a kívánt sebességet és az irányítás hatékonyságát. Az alacsonyabb költségű pályák jobban preferáltak.
+
+    \item \textbf{Új optimális irányítási parancssorozat kiszámítása:}
+    Az algoritmus az értékelt trajektóriák súlyozott átlaga alapján frissíti az irányítási parancsokat. Az alacsony költségű trajektóriák nagyobb súlyt kapnak, így az új parancsok az optimális pálya elérését célozzák.
+
+    \item \textbf{Az első irányítási parancs végrehajtása és az algoritmus ismétlése:}
+    Az algoritmus végrehajtja az újonnan kiszámított irányítási parancs első elemét, majd a fennmaradó parancsokat előre tolja az időben. Ezután az egész folyamatot megismétli a következő időlépésre vonatkozóan.
+\end{enumerate}
