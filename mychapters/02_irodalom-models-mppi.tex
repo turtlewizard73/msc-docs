@@ -127,21 +127,43 @@ Az egyenletek értelmezése alapján $v_{left}$ és $v_{right}$ a bal és jobb o
 \section{Robotok szabályozása}
 A szabályozás kulcsfontosságú a mobil robotok működésében, mivel biztosítja a robot mozgásának stabilitását és pontosságát. Egy autonóm robotnak képesnek kell lennie arra, hogy különböző környezeti feltételek között is megbízhatóan navigáljon, miközben leköveti a kívánt pályát. A szabályozás feladata, hogy a robot kerekének sebességét és irányát dinamikusan módosítsa a kívánt mozgás eléréséhez. Az optimális szabályozás nélkül a robot mozgása instabillá válhat, például csúszás vagy pontatlan kanyarodás léphet fel. Egy jól működő szabályozási rendszer képes kompenzálni a szenzorokból és aktuátorokból származó hibákat, például a kerékcsúszást vagy a zajos pozícióadatokat. A differenciál hajtású robotok esetében a szabályozás különösen fontos, mivel a két hajtott kerék sebességének összehangolása határozza meg a haladási és forgási mozgásokat. A szabályozás lehetővé teszi a robot számára, hogy gyorsan reagáljon a környezet változásaira, például mozgó akadályok elkerülésére. Emellett a szabályozás biztosítja a robot energiahatékonyságát, optimalizálva a hajtáshoz szükséges erőforrásokat. A komplexabb környezetekben, például dinamikus akadályok vagy szűk helyek esetén, a szabályozási algoritmusok teszik lehetővé a robot biztonságos és precíz működését.
 
-Különféle feladatkörök és igények különíthetők el egy autonóm navigáló robot esetében, melyek szétosztása nem a legtriviálisabb feladat, ilyenek lehetnek például a következők:
-\begin{itemize}
-    \item \textbf{Pályatervezés:} Két pont közötti legrövidebb és legbiztonságosabb (akadályok elkerülése szempontjából) útvonal meghatározása.
-    \item \textbf{Pálya követés:} A robotnak a meghatározott pályán való haladásának biztosítása.
-    \item \textbf{Kinematikai és dinamikai korlátok betartása:} A robot mozgásának sebesség vagy gyorsulás korlátok között tartása.
-    \item \textbf{Akadályok elkerülése:} Dinamikus és statikus akadályok felismerése és kikerülése a mozgás során.
-    \item \textbf{Valós idejű döntéshozatal:} A változó környezetben gyors és helyes döntések meghozatala a navigáció során.
-    \item \textbf{Hibaelhárítás:} Hibás szenzoradatok vagy váratlan környezeti hatások kezelése, hogy a robot továbbra is folytathassa a feladatát.
-\end{itemize}
+\subsection{PID szabályzó}
+A PID szabályzó (arányos, integráló, deriváló szabályozó) az egyik legelterjedtebb módszer a vezérlőrendszerekben. Az arányos elem a jelenlegi hiba arányában reagál, az integráló elem a múltbeli hibák összegét veszi figyelembe, míg a deriváló elem a hiba változásának sebességére reagál. Ez a kombináció lehetővé teszi a szabályzó számára, hogy stabilan és pontosan kövesse a kívánt értékeket \cite{astrom_feedback}.
 
-Ezen feladatkörök többféle alrendszerben különülhetnek el. Tervezési kérdés, hogy melyikért mi felel.
-A pályatervezés legtöbbször egy globális tervező feladata, amely az egész mozgástartományról készített reprezentációval dolgozik.
+A PID szabályozó különösen hasznos lehet a robotok sebességszabályozásában, például differenciálhajtású robotok esetén, ahol a kerekek forgási sebességét kell koordinálni az egyenes vonalú mozgás vagy a fordulás érdekében. Mint szabályzó nagyon egyszerű útvonalkövetésnél is használható, ám nyilvánvalóak korlátai. A legelterjedtebb használata motorvezérlőknél jelenik meg, ahol alacsony szinten kell vezérlési feladatokat ellátni. Itt egyszerűsége és gyorsasága nagy előnyt jelent \cite{siciliano_springer_handbook}.
 
-\section{Model prediktív szabályozás}
+Ennek ellenére a PID szabályozó egyszerűsége egyben a korlátja is. Nem képes kezelni komplex, nemlineáris rendszereket vagy többdimenziós optimalizációs problémákat. Emellett a szabályozó paramétereinek manuális hangolása időigényes lehet, és a szabályzó teljesítménye jelentősen csökkenhet, ha a rendszer dinamikája változik \cite{ogata_modern_ce}.
+
+\subsection{PID és az MPC között}
+A PID szabályozó és a model prediktív szabályozás (MPC) között számos olyan szabályozási módszer létezik, amelyek képesek hatékonyan kezelni a robotok sebességvezérlését, különösen útvonalkövetési feladatok esetén. Ezek közé tartozik például a Dinamikus Ablak Alapú (Dynamic Window Approach, DWA) szabályozó \cite{fox_dynamic}.
+
+A DWA egy lokális szabályozási technika, amely az akadálykerülésre és a kívánt sebesség elérésére koncentrál azáltal, hogy egy adott időablakon belül optimalizálja a robot mozgását. Ez a szabályozó különösen jól alkalmazható beltéri robotok navigációjára, ahol az akadályok dinamikusak és a navigációs tér szűk. Bár a DWA hatékony, korlátai közé tartozik, hogy csak lokális optimumokat talál, és nem képes globális optimalizációs problémák kezelésére. Ami természetesen nem jelent problémát, mert egy konvencionális autonóm navigációnál, hiszen itt a szabályzó feladata tényleg a robot környezetében alkalmazott. Jól alkalmazható egy frekventált globális útvonal újratervezést implementáló roboton \cite{siciliano_springer_handbook}.
+
+Más, hasonló szabályozók, mint például a potenciálmező-alapú szabályozók vagy az állapotvisszacsatolásos szabályozók, szintén széles körben használatosak. Ezek gyakran a robot kinematikájának és dinamikájának egyszerűsített modelljére támaszkodnak, és hatékonyak lehetnek egyszerűbb környezetekben, de korlátozottak, amikor komplex akadályok vagy nemlineáris dinamikák lépnek fel \cite{latombe_robot}.
+
+\subsection{Korlátok és igények a modern szabályozásban}
+A hagyományos szabályozási módszerek, mint a PID vagy a DWA, gyakran nem tudnak megbirkózni az autonóm rendszerek összetett követelményeivel. Nemlineáris dinamikák, változó környezeti feltételek, valamint a rendszerek fizikai és működési korlátai olyan kihívásokat jelentenek, amelyeket ezek a szabályozók nem tudnak hatékonyan kezelni \cite{rawlings_model}.
+
+A modern robotikai rendszerek egyre inkább igénylik az optimalizációs célok és komplex korlátok kezelésére képes szabályozási technikákat. A model prediktív szabályozás (MPC) ebben az értelemben kiemelkedő megoldást nyújt, mivel képes előrejelezni a rendszer viselkedését és optimalizálni a vezérlési parancsokat a jövőbeli állapotok alapján. Az MPC lehetőséget biztosít arra, hogy dinamikusan alkalmazkodjon a környezeti változásokhoz \cite{rawlings_model}.
+
+\section{Model prediktív szabályozás (MPC)}
+TODO: hivatkozások
+% Camacho, E. F., & Bordons, C. (2007). Model Predictive Control. Springer.
+% Mayne, D. Q., Rawlings, J. B., Rao, C. V., & Scokaert, P. O. M. (2000). Constrained Model Predictive Control: Stability and Optimality. Automatica, 36(6), 789-814.
+% Maciejowski, J. M. (2002). Predictive Control with Constraints. Prentice Hall.
+
+A model prediktív szabályozás (MPC) egy olyan irányítási módszer, amely a vezérlési feladatokat egy adott időhorizonton belüli optimalizálási problémaként kezeli. Az MPC alapötlete az, hogy a vezérlő a rendszer jövőbeli állapotainak előrejelzésére támaszkodva határozza meg az aktuális vezérlési parancsokat. Ez a megközelítés különösen hatékony dinamikus, nemlineáris és változó környezetekben, ahol a hagyományos szabályozók nehezen alkalmazhatók. Az MPC a rendszer viselkedésének leírására egy matematikai modellt használ, amely jellemzi a rendszer dinamikáját (pl. differenciálegyenletek vagy állapotegyenletek formájában). Megold egy optimalizálási problémát egy adott időhorizonton, amely során minimalizál egy költségfüggvényt (pl. távolság a célponttól). Képes kezelni a rendszer fizikai és működési korlátait, például sebesség- vagy gyorsulási határokat. Az optimalizáció mindig az aktuális állapotból indul, és az időhorizont minden iterációban előre gördül egy megadott időegységgel.
+
+Diszkrét időben egy nemlineáris, determinisztikus rendszernél ez azt jelenti, hogy minden $k$ időpillanatban, meghatározunk egy $N$ időpillanattal (horizont) előre mutató beavatkozó jel sorozatot a rendszer jelenlegi $x_k$ állapotához: $\mathrm{x_k \rightarrow [u_{k+1}, u_{k+2}, ... u_{k+i}, ... u_{k+N}]}$. Majd a meglévő modellt ($\mathrm{x_{k+1} = f(x_k, u_k), y_k = g(x_k)}$) felhasználva, minden beavatkozó jel sorozathoz, kapunk az időhorizonton $\mathrm{y_{k,...,k+N}}$ kimenet értékeket. Ezekből felírható az optimalizálási probléma, amire majd specifikusan az MPPI-nél térek ki. Itt azt szeretném kiemelni és szemléltetni, hogy a jelek sorozatai lehetőséget nyújtanak költségfüggvény részletes paraméterezésére. Opciót biztosít, hogy a beavatkozó jeleknél különféle limiteket állítsunk be, példuál büntetve a túl magas vagy alacsony értékeket. Ugyanez a kimeneti oldalról is elvégezhető. Robotikai alkalamzásnál maradva, az $u_k$ beavatkozó jelnek a sebességet vesszük, akkor a költségfüggvényben leírhatóak gyorsulás korlátok. Sebességekből a modell szerint a horizonton előrevetített pályát számolva annak eltérését lehet büntetni a tervezett útvonaltól.
+
+Az MPC alkalmazása számos területen kiemelkedően hasznos. A robotikában például az MPC alapú vezérlés lehetővé teszi a dinamikus környezetben történő pályakövetést és akadálykerülést. Ez különösen fontos olyan autonóm rendszerek esetén, ahol a robotoknak gyorsan kell reagálniuk a változó körülményekre, miközben biztonságosan és hatékonyan teljesítik a feladataikat.
+
+Az autonóm járművek irányításában az MPC széles körben alkalmazható. A járművek mozgásának optimalizálása érdekében az MPC figyelembe veszi a biztonsági és energiahatékonysági szempontokat. Az előrejelzés alapú vezérlés lehetővé teszi, hogy a jármű elkerülje az ütközéseket és optimális útvonalakat válasszon, miközben a fogyasztást is minimalizálja.
+
+A folyamatirányítás területén az MPC a gyártási folyamatok vezérlésének egyik kulcstechnológiája. Az ipari rendszerek optimalizációja során az MPC csökkenti az energia- és anyaghasználatot, miközben biztosítja a termelés folytonosságát és a minőségi követelmények teljesítését. Az ilyen rendszerekben az MPC használata különösen akkor előnyös, ha a működés során változó feltételekhez kell igazítani a folyamatparamétereket.
+
+Ezek az alkalmazási példák jól mutatják, hogy az MPC mennyire sokoldalú eszköz, amely különböző területeken is képes a szabályozási problémák megoldására. Az optimalizációs képességei és a valós idejű adaptáció lehetőségei miatt az MPC számos modern irányítórendszer alapját képezi.
+
 \section{MPPI}
 - különbséges, hasonlóságok
 - képeletek
-\section{}
