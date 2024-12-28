@@ -58,14 +58,14 @@ A táblázatok használatára \aref{tab:TabularExample}~táblázat mutat példá
 	\centering
 	\begin{tabular}{ l c c }
 		\toprule
-		Órajel & Frekvencia & Cél pin \\
+		Órajel & Frekvencia & Cél pin       \\
 		\midrule
-		CLKA & 100 MHz & FPGA CLK0\\
-		CLKB & 48 MHz  & FPGA CLK1\\
-		CLKC & 20 MHz  & Processzor\\
-		CLKD & 25 MHz  & Ethernet chip \\
-		CLKE & 72 MHz  & FPGA CLK2\\
-		XBUF & 20 MHz  & FPGA CLK3\\
+		CLKA   & 100 MHz    & FPGA CLK0     \\
+		CLKB   & 48 MHz     & FPGA CLK1     \\
+		CLKC   & 20 MHz     & Processzor    \\
+		CLKD   & 25 MHz     & Ethernet chip \\
+		CLKE   & 72 MHz     & FPGA CLK2     \\
+		XBUF   & 20 MHz     & FPGA CLK3     \\
 		\bottomrule
 	\end{tabular}
 	\caption{Az órajel-generátor chip órajel-kimenetei.}
@@ -111,28 +111,28 @@ Képletek esetén az általános konvenció, hogy a kisbetűk skalárt, a kis f�
 
 Emellett kiemelt, sorszámozott képleteket is megadhatunk, ennél az \verb+equation+ és a \verb+eqnarray+ környezetek helyett a korszerűbb \verb+align+ környezet alkalmazását javasoljuk (több okból, különféle problémák elkerülése végett, amelyekre most nem térünk ki). Tehát
 \begin{align}
-\dot{\mathbf{x}}&=\mathbf{A}\mathbf{x}+\mathbf{B}\mathbf{u},\\
-\mathbf{y}&=\mathbf{C}\mathbf{x},
+	\dot{\mathbf{x}} & =\mathbf{A}\mathbf{x}+\mathbf{B}\mathbf{u}, \\
+	\mathbf{y}       & =\mathbf{C}\mathbf{x},
 \end{align}
 ahol $\mathbf{x}$ az állapotvektor, $\mathbf{y}$ a mérések vektora és $\mathbf{A}$, $\mathbf{B}$ és $\mathbf{C}$ a rendszert leíró paramétermátrixok. Figyeljük meg, hogy a két egyenletben az egyenlőségjelek egymáshoz igazítva jelennek meg, mivel a mindkettőt az \& karakter előzi meg a kódban. Lehetőség van számozatlan kiemelt képlet használatára is, például
 \begin{align}
-\dot{\mathbf{x}}&=\mathbf{A}\mathbf{x}+\mathbf{B}\mathbf{u},\nonumber\\
-\mathbf{y}&=\mathbf{C}\mathbf{x}\nonumber.
+	\dot{\mathbf{x}} & =\mathbf{A}\mathbf{x}+\mathbf{B}\mathbf{u},\nonumber \\
+	\mathbf{y}       & =\mathbf{C}\mathbf{x}\nonumber.
 \end{align}
 Mátrixok felírására az $\mathbf{A}\mathbf{x}=\mathbf{b}$ inhomogén lineáris egyenlet részletes kifejtésével mutatunk példát:
 \begin{align}
-\begin{bmatrix}
-a_{11} & a_{12} & \dots & a_{1n}\\
-a_{21} & a_{22} & \dots & a_{2n}\\
-\vdots & \vdots & \ddots & \vdots\\
-a_{m1} & a_{m2} & \dots & a_{mn}
-\end{bmatrix}
-\begin{pmatrix}x_1\\x_2\\\vdots\\x_n\end{pmatrix}=
-\begin{pmatrix}b_1\\b_2\\\vdots\\b_m\end{pmatrix}.
+	\begin{bmatrix}
+		a_{11} & a_{12} & \dots  & a_{1n} \\
+		a_{21} & a_{22} & \dots  & a_{2n} \\
+		\vdots & \vdots & \ddots & \vdots \\
+		a_{m1} & a_{m2} & \dots  & a_{mn}
+	\end{bmatrix}
+	\begin{pmatrix}x_1\\x_2\\\vdots\\x_n\end{pmatrix}=
+	\begin{pmatrix}b_1\\b_2\\\vdots\\b_m\end{pmatrix}.
 \end{align}
 A \verb+\frac+ utasítás hatékonyságát egy általános másodfokú tag átviteli függvényén keresztül mutatjuk be, azaz
 \begin{align}
-W(s)=\frac{A}{1+2T\xi s+s^2T^2}.
+	W(s)=\frac{A}{1+2T\xi s+s^2T^2}.
 \end{align}
 A matematikai mód minden szimbólumának és képességének a bemutatására természetesen itt nincs lehetőség, de gyors referenciaként hatékonyan használhatók a következő linkek:\\
 \indent\url{http://www.artofproblemsolving.com/LaTeX/AoPS_L_GuideSym.php},\\
@@ -243,7 +243,7 @@ Hogy a szövegbe ágyazott hivatkozások kinézetét demonstráljuk, itt most so
 
 Megjegyzendő, hogy az ékezetes magyar betűket is tartalmazó \verb+.bib+ fájl az \verb+inputenc+ csomaggal betöltött \verb+latin2+ betűkészlet miatt fordítható. Ugyanez a \verb+.bib+ fájl hibaüzenettel fordul egy olyan dokumentumban, ami nem tartalmazza a \verb+\usepackage[latin2]{inputenc}+ sort. Speciális igény esetén az irodalmi adatbázis általánosabb érvényűvé tehető, ha az ékezetes betűket speciális latex karakterekkel helyettesítjük a \verb+.bib+ fájlban, pl. á helyett \verb+\'{a}+-t vagy ő helyett \verb+\H{o}+-t írunk.
 
-Irodalomhivatkozásokat célszerű először olyan szolgáltatásokban keresni, ahol jó minőségű bejegyzések találhatók (pl. ACM Digital Library,\footnote{\url{https://dl.acm.org/}} DBLP,\footnote{\url{http://dblp.uni-trier.de/}} IEEE Xplore,\footnote{\url{http://ieeexplore.ieee.org/}} SpringerLink\footnote{\url{https://link.springer.com/}}) és csak ezek után használni kevésbé válogatott forrásokat (pl. Google Scholar\footnote{\url{http://scholar.google.com/}}). A jó minőségű bejegyzéseket is érdemes megfelelően tisztítani.\footnote{\url{https://github.com/FTSRG/cheat-sheets/wiki/BibTeX-Fixing-entries-from-common-sources}} A sablon angol nyelvű változatában használt \texttt{plainnat} beállítás egyik sajátossága, hogy a cikkhez generált hivatkozás a cikk DOI-ját és URL-jét is tartalmazza, ami gyakran duplikátumhoz vezet -- érdemes tehát a DOI-kat tartalmazó URL mezőket törölni. 
+Irodalomhivatkozásokat célszerű először olyan szolgáltatásokban keresni, ahol jó minőségű bejegyzések találhatók (pl. ACM Digital Library,\footnote{\url{https://dl.acm.org/}} DBLP,\footnote{\url{http://dblp.uni-trier.de/}} IEEE Xplore,\footnote{\url{http://ieeexplore.ieee.org/}} SpringerLink\footnote{\url{https://link.springer.com/}}) és csak ezek után használni kevésbé válogatott forrásokat (pl. Google Scholar\footnote{\url{http://scholar.google.com/}}). A jó minőségű bejegyzéseket is érdemes megfelelően tisztítani.\footnote{\url{https://github.com/FTSRG/cheat-sheets/wiki/BibTeX-Fixing-entries-from-common-sources}} A sablon angol nyelvű változatában használt \texttt{plainnat} beállítás egyik sajátossága, hogy a cikkhez generált hivatkozás a cikk DOI-ját és URL-jét is tartalmazza, ami gyakran duplikátumhoz vezet -- érdemes tehát a DOI-kat tartalmazó URL mezőket törölni.
 
 %----------------------------------------------------------------------------
 \section{A dolgozat szerkezete és a forrásfájlok}
@@ -284,13 +284,13 @@ A főfejezetek külön \verb+content+ könyvtárban foglalnak helyet. A sablonho
 %----------------------------------------------------------------------------
 
 \begin{definition}[Fluxuskondenzátor térerőssége]
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+	Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
 \end{definition}
 
 \begin{example}
-Példa egy példára. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+	Példa egy példára. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 \end{example}
 
 \begin{theorem}[Kovács tétele]
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+	Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 \end{theorem}
