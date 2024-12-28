@@ -87,52 +87,18 @@ A controller hozzáfér a helyi környezet reprezentációjához a lokális cost
 A Nav2 kínál egy "nav2\_simple\_commander" névre hallgató Python könyvtárat, mely gyakorlatilag egy API a Nav2-es rendszerhez, mamin keresztül interakcióba léphetünk az épen futó node-okkal. Ez az API "elrejti" a ROS 2 és a Nav2 komplexitásait, így segítve, hogy kizárólag egy alkalmazás fejlesztésére koncentrálhasson a felhasználó. Biztosítja az összes szükséges funkciót a navigációs rendszer kezeléséhez, miközben lehetőséget ad arra, hogy a fejlesztők saját igényeik szerint konfigurálják a Nav2-t az egyéni pluginjaikkal. Az API függvényei egy szálon futattve nem blokkolnak, ezért végrehajtásuk közben lehetőség van visszajelzések feldolgozására és hibakezelésre. Ez különösen hasznos, amikor a robot mozgása közben valós idejű adatok elemzésére vagy a rendszer vezérlésére van szükség. Támogatja a kiadott utasítások preemptív megszakítását, és feladatok közötti váltáskor az explicit megszakítást. API-n keresztül elérhető funkciók, lényeges, de nem teljes felsorolása: inicializálási pozíció megadása, célpontra navigálás elindítása, navigáció állapotának és eredményének lekérése, útvonal követés indítása, costmap-ekkel való interakció és térképváltoztatás. Ezek-et a funkciókat a diplomamunka során is hanszáltam, működésükről a megértést segítve tervezés/fejlesztés fejezetben később részletesen írok. \cite{nav2}
 
 \subsection{MPPI Nav2-ben}
-Az egyik Nav2-ben plugin-ként megvalósított szabályzó az MPPI (Model Predictive Path Integral Controller)
-TODO: ezt átolvasi mppi utáni kutatás után
-TODO: formázás
-A Nav2 MPPI Controller (Model Predictive Path Integral Controller) a Nav2 stack legújabb prediktív vezérlő algoritmusa, amely a TEB és hagyományos MPC útvonal-követési vezérlők utódjaként jelent meg. Ez egy mintavételezés-alapú megközelítést alkalmaz az optimális pályák kiválasztására, iteratív optimalizálást végezve a vezérlési iterációk között. A vezérlő kiegészíthető és testreszabható plugin-alapú objektívfüggvények segítségével, amelyek különböző viselkedéseket és attribútumokat támogathatnak.
-Fő jellemzők:
+A Nav2 MPPI Controller (Model Predictive Path Integral Controller) a Nav2 stack prediktív vezérlő algoritmusa, amely a TEB és hagyományos MPC útvonal-követési vezérlők utódjaként jelent meg. Ez egy mintavételezés-alapú megközelítést alkalmaz az optimális pályák kiválasztására, iteratív optimalizálást végezve a vezérlési iterációk között. A vezérlő kiegészíthető és testreszabható plugin-alapú objektívfüggvények segítségével, amelyek különböző viselkedéseket és attribútumokat támogathatnak. Támogatja a differenciális hajtású, omnidirekcionális és Ackermann-kormányzású robotokat. A vezérlő akár 50 Hz-es vagy nagyobb frissítési sebességgel képes futni közepes teljesítményű processzorokon (pl. 4. generációs Intel i5). Nem konvex és nem differenciálható objektívfüggvények támogatása, ami jelentős tervezői rugalmasságot biztosít. Egy modell-alapú prediktív vezérlő (MPC) variáns, amely iteratív megközelítéssel találja meg a robot számára optimális sebességparancsokat. Az algoritmus lépései:
 
-Támogatja a differenciális hajtású, omnidirekcionális és Ackermann-kormányzású robotokat.
-A vezérlő akár 50 Hz-es vagy nagyobb frissítési sebességgel képes futni közepes teljesítményű processzorokon (pl. 4. generációs Intel i5).
-Nem konvex és nem differenciálható objektívfüggvények támogatása, ami jelentős tervezői rugalmasságot biztosít.
+\begin{itemize}
+    \item \textbf{Kezdeti állapot:} Az előző időlépés legjobb vezérlési megoldása és a robot aktuális állapota alapján történik a vezérlés.
+    \item \textbf{Perturbációk alkalmazása:} Egy Gauss-eloszlásból véletlenszerűen mintavételezett perturbációk kerülnek a vezérlési parancsokra.
+    \item \textbf{Szimuláció:} Ezeket a zavarokkal módosított vezérlési parancsokat a robot mozgásmodelljén keresztül előre szimulálja, amely különböző pályákat generál.
+    \item \textbf{Pontozás:} A generált pályákat egyedi, plugin-alapú függvények segítségével súlyozza.
+    \item \textbf{Vezérlési döntés:} A pályák pontszámait egy softmax függvény segítségével súlyozza, és ennek alapján választja ki az aktuális vezérlési parancsot.
+    \item \textbf{Iteráció:} Az optimalizálási folyamatot többször megismétli, amíg a vezérlési parancsok kielégítőek nem lesznek.
+\end{itemize}
 
-Működési elv:
-Az MPPI algoritmus egy modell-alapú prediktív vezérlő (MPC) variáns, amely iteratív megközelítéssel találja meg a robot számára optimális sebességparancsokat. Az algoritmus lépései:
-
-Kezdeti állapot: Az előző időlépés legjobb vezérlési megoldása és a robot aktuális állapota alapján történik a vezérlés.
-Perturbációk alkalmazása: Egy Gauss-eloszlásból véletlenszerűen mintavételezett perturbációk kerülnek a vezérlési parancsokra.
-Előre szimuláció: Ezeket a zavarokkal módosított vezérlési parancsokat a robot mozgásmodelljén keresztül előre szimulálja, amely különböző pályákat generál.
-Pontozás: A generált pályákat egyedi, plugin-alapú kritikus függvények segítségével kiértékeli, és megtalálja a legjobb pályát.
-Vezérlési döntés: A pályák pontszámait egy softmax függvény segítségével súlyozza, és ennek alapján választja ki az aktuális vezérlési parancsot.
-Iteráció: Az optimalizálási folyamatot többször megismétli, amíg a vezérlési parancsok konvergenciája elérhető.
-
-Előnyök:
 Az MPPI Controller lehetővé teszi komplex és nem hagyományos viselkedések implementálását, mivel az objektívfüggvények tervezői szabad kezet kapnak a nem konvex és nem differenciálható szabályok használatában. Ez az innovatív megközelítés rugalmasabbá teszi a vezérlőt kutatási és ipari környezetben egyaránt.
-
-\subsection{MPPI Controller paraméterei}
-TODO: formázás
-Az alábbiakban a szabályzó működésének fontosabb paraméterei:
-
-% motion\_model: pályatervezéshez használ robotmodell (differenciál hajtású, omnidirekcionális, ackermann)
-% critics: lista a használni kívánt critic függvényekről
-% iteration\_count: az iterációk száma egy vezérlési cikluson belül
-% batch\_size: véletlenszerűen generált vezérlési parancsok száma egy iteráción belül
-% time\_steps: a jövőbeli állapotok száma, amelyeket a vezérlési parancsokkal előre szimulál
-% model\_dt: szimulált állapotok közötti időlépés
-% vx\_std: a sebesség szórása robot haladási irányával megegyező irányban
-% vy\_std: a sebesség szórása robot oldalirányú irányával megegyező irányban (csak omnidirekcionális robotok esetén)
-% wz\_std: a szögsebesség szórása (robot z tengelye körül)
-% vx\_max: a maximális haladási sebesség
-% vy\_max: a maximális oldalirányú sebesség (csak omnidirekcionális robotok esetén)
-% wz\_max: a maximális szögsebesség
-% ax\_max: a maximális gyorsulás robot haladási irányában
-% ay\_max: a maximális gyorsulás robot oldalirányú irányában (csak omnidirekcionális robotok esetén)
-% temperature: a generált vezérlési parancsok összegzésének mértéke, minél közelebb van 0-hoz, annál többet vesz számításba a kisebb értékű vezérlési parancsokból
-% gamma: komplex paraméter (mely módosítását nem javasolja a leírás), energiafelhasználás szempontjából fontos
-% retry\_attempt\_limit: a próbálkozások száma, amelyeket a végrehajtható trajektória megtalálására végeznek sikertelenség esetén, mielőtt teljes hibát jeleznének
-% reset\_period: inaktivitási időszak, amely után a szabályzó újraindul
-% regenerate\_noises: a zajok újragenerálásának módosítására szolgáló paraméter
 
 \section{Odometria és TF}
 Eddig sokszor volt szó a robot pozíciójáról és említve volt, a Gazebo fejezetben, hogyan hozható létre robot modell szenzorokkal. Ezekhez köthető az odometria (odometry) és koordináta-transzformációk rendszere (tf). A különböző koordináta-rendszerek és azok közötti átalakítások biztosítják, hogy a robot megfelelően érzékelje és kövesse a mozgását a környezetében. Három alapvető koordináta-rendszert használ a ROS 2:

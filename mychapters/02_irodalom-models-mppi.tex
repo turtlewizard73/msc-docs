@@ -187,3 +187,202 @@ Az Model Predictive Path Integral (MPPI) szabályozó egy modern, mintavétel-al
     \item \textbf{Az első irányítási parancs végrehajtása és az algoritmus ismétlése:}
     Az algoritmus végrehajtja az újonnan kiszámított irányítási parancs első elemét, majd a fennmaradó parancsokat előre tolja az időben. Ezután az egész folyamatot megismétli a következő időlépésre vonatkozóan.
 \end{enumerate}
+
+\subsection{Optimalizációs cél}
+Az MPPI algoritmus célja az optimális vezérlési jel sorozat (autonóm robot esetében a beavatkozó sebességek) \( \mathbf{u}^* = \{u_0, u_1, \dots, u_{N-1}\} \) meghatározása, amely minimalizálja a rendszer költségfüggvényét és figyelembe veszi a modell dinamikáját. Az optimalizáció célja az alábbi:
+\begin{equation}
+\mathbf{u}^* = \arg\min_{\mathbf{u}} \mathbb{E}_P \left[ \exp\left(-\frac{1}{\lambda} S(\tau)\right) \right],
+\end{equation}
+
+ahol:
+\begin{itemize}
+    \item \( \mathbb{E}_P \): a rendszer dinamikája szerinti várható érték,
+    \item \( S(\tau) \): az adott pálya költsége, amely:
+    \begin{equation}
+    S(\tau) = \phi(x_T, T) + \int_{t_0}^T q(x_t, u_t, t) \, dt,
+    \end{equation}
+    \item \( \phi(x_T, T) \): a végállapot költsége,
+    \item \( q(x_t, u_t, t) \): a pillanatnyi költség, amely az állapottól \(x_t\) és a bemenettől \(u_t\) függ.
+\end{itemize}
+
+\subsection{Relatív entrópia minimalizálása}
+Az MPPI algoritmus a vezérlési eloszlást \( Q(u) \) közelíti az optimális eloszláshoz \( Q^*(u) \) a KL-divergencia minimalizálásával:
+\begin{equation}
+\mathbf{u}^* = \arg\min_{\mathbf{u}} D_{KL}(Q^* \,||\, Q(u)),
+\end{equation}
+
+ahol:
+\begin{itemize}
+    \item \( D_{KL}(Q^* \,||\, Q(u)) \): a relatív entrópia az optimális és az aktuális vezérlési eloszlás között,
+    \item \( Q^*(u) \): az optimális vezérlési eloszlás:
+    \begin{equation}
+    Q^*(\tau) \propto \exp\left(-\frac{1}{\lambda} S(\tau)\right).
+    \end{equation}
+\end{itemize}
+
+\subsection{Iteratív beavatkozó jel frissítése}
+Az MPPI iteratív módon frissíti a vezérlési bemeneteket a következő szabály alapján:
+\begin{equation}
+\mathbf{u}_j^* = \frac{1}{\Delta t} H^{-1} G \mathbb{E}_P \left[ \exp\left(-\frac{1}{\lambda} S(\tau)\right) \epsilon_j \sqrt{\Delta t} \right],
+\end{equation}
+
+ahol:
+\begin{itemize}
+    \item \( H \) és \( G \): a rendszer dinamikáját leíró mátrixok,
+    \item \( \epsilon_j \): véletlenszerű perturbációk,
+    \item \( \Delta t \): az időbeli diszkretizáció lépésköze.
+\end{itemize}
+
+\subsection{A Módszer Lényege}
+Az MPPI vezérlő számos lehetséges pályát generál a nem vezérelt dinamikából kiindulva. Ezeket a pályákat költségfüggvény alapján súlyozza, és a legjobb pályához tartozó vezérlést alkalmazza. A GPU-alapú párhuzamosítás lehetővé teszi, hogy az MPPI valós időben (például 60 Hz-en) optimalizálja a vezérlést, még komplex rendszerek esetében is. Az MPPI algoritmus előnyei közé tartozik, hogy:
+\begin{itemize}
+    \item képes nemlineáris, nem differenciálható költségfüggvények kezelésére,
+    \item valós időben generál új pályákat és viselkedéseket,
+    \item robusztus a rendszer dinamikájának pontatlanságával szemben.
+\end{itemize}
+
+\section{Optimalizáció}
+TODO: források
+%Boyd, Stephen, and Lieven Vandenberghe. "Convex Optimization."
+%Ez a könyv az optimalizáció elméletének alapjait mutatja be, különös hangsúlyt helyezve a konvex problémákra és azok gyakorlati alkalmazásaira.
+
+%Nocedal, Jorge, and Stephen J. Wright. "Numerical Optimization."
+%Ez a mű részletesen tárgyalja a gradiens-alapú módszereket, mint a Newton- és kvázi-Newton-módszerek, amelyek kulcsfontosságúak a mérnöki optimalizációban.
+
+%Goldberg, David E. "Genetic Algorithms in Search, Optimization, and Machine Learning."
+%A genetikus algoritmusok alapvető kézikönyve, amely heurisztikus megközelítéseket mutat be komplex optimalizációs problémákra.
+
+%Rawlings, James B., and David Q. Mayne. "Model Predictive Control: Theory and Design."
+%Ez a könyv az MPC alapelveit tárgyalja, részletes példákkal illusztrálva, beleértve a prediktív szabályozás és optimalizáció kapcsolatát.
+
+%Deb, Kalyanmoy. "Multi-Objective Optimization Using Evolutionary Algorithms."
+%A többcélú optimalizációhoz kapcsolódó evolúciós algoritmusokról nyújt mélyreható áttekintést.
+
+%Garcia, Carlos E., and Manfred Morari. "Model predictive control: theory and practice—a survey." Automatica (1982).
+%Ez a cikk széles körű áttekintést nyújt az MPC-ről, beleértve annak gyakorlati alkalmazásait és elméleti hátterét.
+
+%Bertsekas, Dimitri P. "Nonlinear Programming."
+%Ez a könyv átfogó bevezetést nyújt a nemlineáris optimalizációba, számos algoritmussal és matematikai eszközzel.
+Az optimalizáció egy olyan tudományág, amely az optimális megoldások megtalálására törekszik egy adott probléma esetén, meghatározott célfüggvény és korlátozó feltételek figyelembevételével. Számos mérnöki, gazdasági és tudományos probléma igényli az optimalizáció eszközeinek alkalmazását, különösen olyan esetekben, amikor a rendelkezésre álló erőforrások szűkösek, vagy a cél egy rendszer hatékonyságának maximalizálása.
+
+\subsection{Az optimalizáció általános fogalma}
+Az optimalizáció alapvetően egy matematikai probléma megoldását jelenti, amelyben egy célfüggvényt minimalizálni vagy maximalizálni kell. Formálisan az optimalizációs probléma általános alakja:
+\begin{align}
+    \text{Minimalizálandó vagy maximalizálandó: } & f(x), \\
+    \text{Feltételek mellett: } & g_i(x) \leq 0, \quad i = 1, \dots, m, \\
+    & h_j(x) = 0, \quad j = 1, \dots, p.
+\end{align}
+
+Itt $x$ az optimalizálandó változók vektora, $f(x)$ a célfüggvény, $g_i(x)$ a korlátfeltételeket, $h_j(x)$ pedig az egyenletességi feltételeket reprezentálja.
+
+\subsection{Optimalizáció alkalmazása a robotikában}
+Az optimalizáció jelentős szerepet játszik a robotikai rendszerek tervezésében és irányításában. Különösen fontos az autonóm rendszerek esetében, ahol az optimalizáció segítségével maximalizálható a navigáció hatékonysága az útvonalak optimalizálásával, minimalizálhatók az energiafelhasználásból és a mozgásvezérlésből eredő költségek, garantálható az akadályok sikeres elkerülése dinamikus környezetekben. Egy konkrét példaként említhető a \textit{Model Predictive Control} (MPC), amely egy prediktív szabályozási technika. Az MPC optimalizációs eljárásokkal valósítja meg a jövőbeli állapotok előrejelzését és a vezérlési parancsok generálását.
+
+\subsection{Optimalizációs algoritmusok}
+Az optimalizációs problémák megoldására számos algoritmus áll rendelkezésre, amelyek közül a leggyakrabban alkalmazottak:
+
+\begin{itemize}
+    \item \textbf{Gradiens-alapú módszerek}: Például a Newton-módszer és a gradienscsökkenés, amelyek differenciálható célfüggvényeket igényelnek.
+    \item \textbf{Heurisztikus módszerek}: Mint a genetikus algoritmusok vagy a részecskeraj-algoritmus, amelyek komplex vagy nem deriválható problémákra alkalmazhatók.
+    \item \textbf{Konvex optimalizációs technikák}: Ezek garantáltan találják meg a globális optimumot konvex problémák esetén.
+\end{itemize}
+
+\section{Alkalmazott optimalizációs eljárások}
+\subsection{Random keresés}
+A random keresés (vagy véletlen mintavételezés) egy egyszerű, heurisztikus optimalizációs módszer, amely véletlenszerűen választ ki pontokat a paramétertérből, és ezeket értékeli a célfüggvény alapján.
+
+\subsubsection{Előnyök}
+\begin{itemize}
+    \item Könnyen implementálható, és nem igényel előzetes ismereteket a célfüggvényről.
+    \item Hatékony lehet magas dimenziós térben, ha az optimális pont közel van a véletlen mintákhoz.
+    \item Képes elkerülni a lokális optimumok csapdáját.
+\end{itemize}
+
+\subsubsection{Hátrányok}
+\begin{itemize}
+    \item Lassú konvergencia, különösen nagy paramétertér esetén.
+    \item Nem garantált, hogy megtalálja a globális optimumot.
+\end{itemize}
+
+A random keresés futásideje az értékelendő minták számától függ. A szükséges minták száma exponenciálisan növekedhet a paramétertér dimenziójával, ami korlátozhatja a módszer hatékonyságát nagyobb dimenziók esetén.
+
+\subsection{Grid keresés}
+A grid keresés (rács alapú keresés) a paramétertér egyenletes felosztásával próbálja meg meghatározni az optimális pontot. A módszer minden rácsponton kiértékeli a célfüggvényt.
+
+\subsubsection{Előnyök}
+\begin{itemize}
+    \item Egyszerű implementáció és determinisztikus viselkedés.
+    \item Garantáltan megtalálja az optimális pontot, ha elegendő rácspontot használunk.
+\end{itemize}
+
+\subsubsection{Hátrányok}
+\begin{itemize}
+    \item Magas számítási költség a paramétertér dimenziójának növekedésével.
+    \item Nem skálázható jól, mivel a rácspontok száma exponenciálisan növekszik a dimenzióval.
+\end{itemize}
+
+A futásidő a rácspontok számával arányos, amely $n^d$ formában írható fel, ahol $n$ a pontok száma tengelyenként, $d$ pedig a dimenziók száma. Ez a kombinatorikus robbanás problémájához vezethet.
+
+\subsection{Bayesian optimalizáció}
+A Bayesian optimalizáció egy kifinomultabb módszer, amely a valószínűségi modellezést és az akvizíciós függvényeket használja a paramétertér hatékony mintázására.
+
+\subsubsection{Előnyök}
+\begin{itemize}
+    \item Hatékony kis mintaszám mellett, mivel a minták helyét adaptívan választja meg.
+    \item Jól alkalmazható drága célfüggvények esetén.
+    \item Képes kezelni nem deriválható és zajos függvényeket.
+\end{itemize}
+
+\subsubsection{Hátrányok}
+\begin{itemize}
+    \item Összetettebb implementáció, és számításigényes lehet a valószínűségi modell frissítése.
+    \item Kevésbé hatékony magas dimenziójú problémák esetén.
+\end{itemize}
+
+A Bayes optimalizáció futásideje a valószínűségi modell frissítésének költségétől függ, amely a minták számával nő. Magas dimenziók esetén a modell komplexitása korlátozhatja a hatékonyságot.
+
+\section{Frechét-távolság}
+A Frechét-távolság egy széles körben alkalmazott metrika, amely két görbe közötti hasonlóság mérésére szolgál. Eredetileg geometriai problémákra fejlesztették ki, de az autonóm robotikában, különösen a mozgástervezési és pályakövetési feladatok során, rendkívül hasznosnak bizonyul. 
+
+A Frechét-távolság két görbe, \( P \) és \( Q \), között a következőképpen definiálható:
+\begin{equation}
+    d_F(P, Q) = \inf_{\alpha, \beta} \max_{t \in [0,1]} \| P(\alpha(t)) - Q(\beta(t)) \|,
+\end{equation}
+
+ahol:
+\begin{itemize}
+    \item \( P \) és \( Q \): két görbe, amelyek egy-egy pályát reprezentálnak, \( P : [0,1] \to \mathbb{R}^2 \) és \( Q : [0,1] \to \mathbb{R}^2 \).
+    \item \( \alpha \) és \( \beta \): folyamatos paraméterezési függvények, amelyek az \( [0,1] \) intervallumot leképezik a görbékre.
+    \item \( \| \cdot \| \): az Euklideszi távolság.
+\end{itemize}
+
+A definíció szerint a Frechét-távolság minimalizálja azt a maximális távolságot, amelyet két görbe közötti "sétáló pár" tehet meg, miközben mindkét görbét végigjárják. Ezáltal figyelembe veszi a görbék globális geometriáját, nem csupán a pontok közötti páronkénti távolságot, mint például a Hausdorff-távolság.
+
+A Frechét-távolság különösen hasznos autonóm robotok pályakövetési problémáiban, mivel lehetővé teszi a robot által tervezett pálya és a ténylegesen bejárt pálya közötti eltérések mérését. Ez segít a szabályzó értékelésében, mivel figyelembe veszi a görbék globális geometriáját, nem csupán a pontok közötti távolságokat. A metrika robusztus kiértékelést biztosít olyan esetekben is, ahol a görbék eltérő hosszúságúak vagy zajjal terheltek, ami gyakori a valós robotikai rendszerekben. Szóval megmérhetjük, hogy a robot mennyire pontosan követi a tervezett pályát. A kisebb Frechét-távolság jobb követést jelez, mivel a tényleges és a tervezett pálya közötti eltérés minimális.
+
+
+\section{RMS módszer: Root Mean Squared}
+A Root Mean Squared (RMS) módszer egy statisztikai mutató, amely egy adott adathalmaz átlagos négyzetes eltérését méri. Lehetővé teszi a mozgási dinamikák, például gyorsulások vagy sebességek változásának kvantitatív elemzését. Ez a metrika az MPPI szabályzó alkalmazásában kiemelten fontos, hiszen segítségével objektíven értékelhetők a szabályzó által generált vezérlési jelek.
+
+Az RMS kiszámítása az alábbi képlettel történik:
+\begin{equation}
+    \text{RMS} = \sqrt{\frac{1}{N} \sum_{i=1}^{N} x_i^2},
+\end{equation}
+
+ahol:
+\begin{itemize}
+    \item \( x_i \): az adatsor \( i \)-edik eleme,
+    \item \( N \): az adatsor elemeinek száma.
+\end{itemize}
+
+Az RMS kiszámításához először az adatsor minden elemét négyzetre emeljük, majd ezek átlagát vesszük, végül pedig az átlagból négyzetgyököt vonunk. Az eredmény egy olyan skálázott érték, amely jól reprezentálja az adatsor tipikus nagyságát.
+
+Az autonóm robotok mozgásának dinamikája szorosan összefügg a gyorsulási jelekkel, amelyek az alábbi módokon értelmezhetők az RMS segítségével: az RMS mutatja, hogy egy adott időtartományban mekkora volt a gyorsulások átlagos nagysága. Ez fontos indikátor a mozgás simaságának megítélésében, következtethetünk arra, hogy a rendszer milyen mértékben van kitéve erőteljes gyorsulási ingadozásoknak, amelyek növelhetik az energiafelhasználást vagy csökkenthetik a robot mechanikai komponenseinek élettartamát, segít a gyorsulási minták jellemző eltéréseinek kiemelésében, amelyek optimalizációs paraméterek finomhangolását indokolhatják.
+
+\subsection{Előnyök és gyakorlati jelentőség}
+Az RMS mutató előnye, hogy robusztus és érzékeny az extrém értékekre, ami különösen hasznos autonóm robotok mozgásának elemzésében. Az MPPI szabályzó finomhangolásánál az RMS segít:
+\begin{itemize}
+    \item A mozgási minták objektív összehasonlításában,
+    \item A dinamikai hatások azonosításában és minimalizálásában,
+    \item Az optimalizációs paraméterek precíz meghatározásában.
+\end{itemize}

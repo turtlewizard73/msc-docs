@@ -2,6 +2,137 @@
 \chapter{Megvalósítás}
 %----------------------------------------------------------------------------
 
-\section{Környezet}
+\section{Projekt felépítés}
+A diplomamunka keretében kifejlesztett szoftverprojekt célja, hogy az MPPI (Model Predictive Path Integral) szabályzót vizsgálja autonóm robotok esetében. A projekt struktúráját úgy alakítottam ki, hogy a különböző modulok elkülönülten, de egymással könnyen integrálható módon működjenek. Az alábbiakban bemutatom a projekt felépítését és főbb komponenseit.
 
-\section{}
+A projektben több kulcsfontosságú osztályt és modult hoztam létre, amelyek a rendszer logikai és funkcionális részeit valósítják meg:
+\begin{itemize}
+    \item \textbf{ControllerMetric}: Ez az osztály felelős a mérések közbeni adatok gyűjtésére és a különböző statisztikai mutatók számítására. Tartalmazza a generált pályaadatokat, a robot helyzetét, valamint a költségfüggvények értékeit, illetve térkép adatokat.
+    \item \textbf{Adatgyűjtési modul}: A mérési adatok gyűjtésére és előfeldolgozására szolgál. A robot szenzoraiból és mérésekből származó adatokat dolgozza fel.
+    \item \textbf{Optimalizációs modul}: A szabályzó paraméterek finomhangolására szolgáló optimalizációs algoritmusokat tartalmazza. A különböző paraméterkombinációk kiértékelésére képes, és a konfigurációkat menti el.
+    \item \textbf{Vizualizációs eszközök}: Az adatgyűjtési és kiértékelési eredmények vizualizálására hoztam létre, hogy átlátható legyen a vezérlő teljesítménye.
+\end{itemize}
+
+A projekt fejlesztése Python programozási nyelven történt, kihasználva annak széles körű könyvtár-támogatását az adatfeldolgozás, optimalizáció és vizualizáció terén. Az alábbi eszközöket használtam:
+\begin{itemize}
+    \item \textbf{NumPy}: Numerikus számításokhoz és mátrixműveletekhez.
+    \item \textbf{Matplotlib}: Az eredmények vizualizációjához.
+    \item \textbf{ROS 2}: A robot szoftveres környezetének integrációjához.
+    \item \textbf{Pandas}: Az adatkezeléshez és -elemzéshez.
+\end{itemize}
+
+\section{Mért adatok és feldolgozásuk}
+A diplomamunka keretében gyűjtött adatok a robot működésének részletes elemzését és kiértékelését szolgálják. Az adatok feldolgozása során a szabályzó minőségének mérésére és a robot mozgásának pontos nyomon követésére használtam különféle adatgyűjtési és számítási módszereket. Az alábbiakban bemutatom az adatgyűjtés főbb lépéseit, valamint az elemzéshez és feldolgozáshoz használt osztályokat és függvényeket.
+
+\subsection{ControllerMetric osztály}
+A \texttt{ControllerMetric} osztály az egyik legfontosabb adatstruktúra a projektben. Az osztály célja, hogy összegyűjtse és tárolja a szabályzó futtatása során mért adatokat, valamint számított metrikákat.
+\begin{itemize}
+    \item \textbf{Azonosítók}: A vezérlő nevét (\texttt{controller\_name}) és a térkép nevét (\texttt{map\_name}) tartalmazza, amelyeken a vezérlő futott. Az egyedi azonosító (\texttt{uid}) egyedi futtatásokat különít el, például időbélyeg vagy paraméterek alapján.
+    \item \textbf{Idő és eredmény}: Tárolja a futási időt (\texttt{time\_elapsed}), a cél elérésének sikerességét (\texttt{success}) és az állapotüzenetet (\texttt{status\_msg}), amely leírja az esetleges hibákat vagy kiegészítő információkat.
+    \item \textbf{Gyűjtött adatok}: 
+    \begin{itemize}
+        \item Navigációs útvonal (\texttt{path\_xy}, \texttt{path\_omega}): Az elérni kívánt célponthoz vezető tervezett pályát tartalmazza.
+        \item Odometriás adatok (\texttt{odom\_xy}, \texttt{odom\_omega}, \texttt{odom\_t}): A robot valós mozgását követő szenzoradatokat tartalmazza.
+        \item Vezérlőparancsok (\texttt{cmd\_vel\_xy}, \texttt{cmd\_vel\_omega}, \texttt{cmd\_vel\_t}): A szabályzó által kiadott lineáris és szögsebességi parancsokat tartalmazza.
+        \item Critic értékek (\texttt{critic\_scores}): Az MPPI vezérlő által használt különböző critic függvények értékek, amelyeket a pályaelemzéshez gyűjtöttem.
+        \item Térkép (\texttt{costmap}): A robot környezetét reprezentáló térkép, amely alapján a közelség számítható az akadályokhoz.
+    \end{itemize}
+    
+    \item \textbf{Számított adatok}: 
+    \begin{itemize}
+        \item Frechét-távolság (\texttt{frechet\_distance}): A tervezett és valós pálya közötti hasonlóság mértéke.
+        \item Távolság a céltól (\texttt{distance\_to\_goal}) és szöhiba (\texttt{angle\_to\_goal}).
+        \item Lineáris és szögsebességi statisztikák, mint például átlagsebesség, maximum sebesség és RMS.
+        \item Jerk (rándulás) és gyorsulás elemzése: Ezek a metrikák a mozgás dinamikájának elemzésére szolgálnak.
+        \item Útvonal menti költségek (\texttt{path\_costs}, \texttt{sum\_of\_costs}, \texttt{avg\_cost}): Az útvonal mentén mért cellák költségeinek összegzése és átlagolása.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Adatgyűjtés és feldolgozó node-ok}
+Az adatgyűjtéshez különböző ROS2 node-okat használtam, amelyek az alábbi adatokat gyűjtötték:
+\begin{itemize}
+    \item \textbf{OdomSubscriber}: Ez a node felelős a robot odometria adatainak gyűjtéséért, mint például a pozíció (\texttt{odom\_xy}), a szögsebesség (\texttt{odom\_omega}) és az időbélyeg (\texttt{odom\_t}).
+    \item \textbf{CmdVelSubscriber}: A vezérlő által kiadott parancsokat rögzíti, beleértve a lineáris és szögsebességeket (\texttt{cmd\_vel\_xy}, \texttt{cmd\_vel\_omega}).
+    \item \textbf{MPPICriticSubscriber}: Az MPPI vezérlő critic függvényei által számolt adatokat gyűjti, amelyek az útvonal optimalizálását segítik.
+\end{itemize}
+
+Az adatok feldolgozása és kiértékelése lehetővé tette a vezérlő működésének mélyebb megértését, valamint a különböző paraméterkombinációk összehasonlítását.
+
+\section{Mérések futtatása}
+\subsection{Mérések parametrizálása}
+A mérési folyamat egyik legfontosabb része a paraméterek előzetes konfigurálása, amely biztosítja, hogy a mérések a kívánt körülmények között fussanak le, és az adatok pontosan megfeleljenek a vizsgálati céloknak. Az általános paraméterek konfigurációja a mérési környezet, a robot mozgási tulajdonságai, valamint a térképadatok és vezérlési beállítások pontos definiálását foglalja magában. Ezeket egy YAML formátumú konfigurációs fájl segítségével adtam meg.
+
+A konfigurációs fájl tartalmazza azokat az alapvető paramétereket, amelyek a robot és a mérési környezet definiálásához szükségesek, a lényegeseket kiemelve:
+\begin{itemize}
+    \item \textbf{Robotnév és méretek}: A \texttt{robot\_name} paraméter például a \texttt{turtlebot3\_waffle} robotot határozza meg, míg a \texttt{robot\_radius} paraméter a robot sugarát adja meg méterben.
+    \item \textbf{Vezérlési és szenzor adatok}: A \texttt{cmd\_vel\_topic}, \texttt{odom\_topic}, és \texttt{costmap\_topic} paraméterek meghatározzák azokat a ROS-topikokat, amelyeken keresztül a robot vezérlési parancsait és szenzoradatait gyűjtjük.
+    \item \textbf{Navigációs útvonaltervező és szabályzó}: A \texttt{planner} (\texttt{GridBased}) és \texttt{controller} (\texttt{FollowPath}) paraméterek határozzák meg, hogy a robot mely algoritmusokat használja az útvonaltervezéshez és szabályozáshoz.
+\end{itemize}
+
+Szintén ebben a fájlban adható meg különböző térképek leírása, például az útvonalak kezdő- és célpontjainak koordinátáit, valamint a térképek elérési útvonalai:
+\begin{itemize}
+    \item \textbf{Térképek neve és elérési útvonala}: Például a \texttt{complex\_test} térképhez tartozó YAML-fájl (\texttt{maps/complex.yaml}) tartalmazza a térkép metaadatait.
+    \item \textbf{Kezdő- és célpozíciók}: A \texttt{start\_pose} és \texttt{goal\_pose} paraméterek definiálják, hogy a robot honnan indul és hol kell befejeznie az adott mérést.
+    \item \textbf{Lokális és globális térképek}: A \texttt{path\_local} lehetőséget ad arra, hogy lokális térképeket is használjunk.
+\end{itemize}
+
+A mérések futtatásakor a következő paramétereket lehet konfigurálni:
+\begin{itemize}
+    \item \textbf{Útvonaltervezés és szabályzó algoritmusok}: A konfiguráció lehetővé teszi különböző tervező és szabályzó kombinációk kipróbálását, például a \texttt{FollowPath} szabályzó és a \texttt{GridBased} tervező használatával.
+    \item \textbf{Térképek közötti váltás}: Az egyes mérések különböző térképeken hajthatók végre, például a \texttt{complex}, \texttt{complex\_test} vagy \texttt{turtlebot3} térképen, amelyek különböző környezeti akadályokat és pályaszerkezeteket reprezentálnak.
+    \item \textbf{Robotpozíciók}: A mérésekhez eltérő kezdő- és célpozíciókat adhatunk meg, amelyek lehetővé teszik az útvonalak sokféleségének vizsgálatát.
+    \item \textbf{Időtúllépési küszöbök}: A mérések futási idejét szabályozhatjuk \texttt{timeout} értékek megadásával, így a szabályzó optimális teljesítményét mérhetjük.
+\end{itemize}
+
+\subsection{Beállítások mérés előtt}
+Egy mérés lefuttatása előtt számos beállítást szükséges elvégezni. Az előzetes lépések magukban foglalják a térkép és a kezdőpozíció kiválasztását, valamint a szimulációs környezet megfelelő inicializálását az előző fejezetben leírt paraméterezés szerint.
+
+A térkép és a kezdőpozíció beállítása a YAML konfigurációban meghatározott paraméterek alapján történik. A robot kezdő- és célpozícióit a \texttt{start\_pose} és \texttt{goal\_pose} értékei határozzák meg, amelyeket a mérés során betöltött térkép alapján választunk ki. Ezek a beállítások biztosítják, hogy a robot az előre definiált környezetben és pályán mozogjon. A szimulációs környezet inicializálásához elengedhetetlen a környezet újrainicializálása és a robot pozíciójának visszaállítása. Ez jelenti a Gazebo szimulátor világnak alaphelyzetbe állítását, valamint a robot aktuális pozíciójának frissítését a térképen. A szimuláció újrainicializálása biztosítja, hogy minden mérés azonos kezdőfeltételekkel induljon, kizárva a korábbi szimulációkból származó hatásokat. A mérések előtt emellett lehetőség van a szabályzó paramétereinek állítására.
+
+\subsection{Adatgyűjtés mérés közben}
+A mérési folyamat egyik kulcsfontosságú része az adatgyűjtés, amely során különböző szenzorokból és vezérlési topik-okról származó információkat gyűjtök össze. A megvalósítás során az adatgyűjtés hatékony szimultán végrehajtása érdekében a ROS executor mechanizmusát és különálló thread-eket használtam.
+
+Az adatgyűjtést az egyes node-ok, például a \texttt{CmdVelSubscriber}, 	\texttt{OdomSubscriber} és 	\texttt{MPPICriticSubscriber}, külön-külön végzik. Ezek a node-ok a megfelelő ROS-topikokra feliratkozva gyűjtik az adatokat, mint például a sebességparancsokat (\texttt{cmd\_vel}), az odometriát (\texttt{odom}) és a szabályzó critic függvényeinek pontozását (\texttt{mppi\_critic\_scores}). Az adatgyűjtés szimultán futtatásához minden node-hoz külön ROS executor-t és szálat hoztam létre. Az executorok felelősek a node-ok ciklikus működéséért, míg a thread-ek biztosítják, hogy az adatgyűjtés párhuzamosan fusson. Ez a megközelítés garantálja, hogy az adatgyűjtési folyamatok egymástól függetlenül, valós időben történjenek. A mérések során a node-ok adatgyűjtését a \texttt{ControllerBenchmark} osztály vezérli. A mérés elején a node-ok gyűjtési módja aktiválásra kerül, míg a mérés végén ezek leállításra kerülnek. Az összegyűjtött adatokat a node-okból egy közös hívással lehet lekérni, amely biztosítja, hogy az adatok egységes időbélyeggel rendelkezzenek és megfelelő formátumban kerüljenek feldolgozásra.
+
+Ez a megoldás lehetővé teszi a mérési adatok pontos és hatékony begyűjtését, miközben minimalizálja az adatgyűjtésből adódó időbeli eltéréseket. Az összegyűjtött adatok megbízható alapot nyújtanak a szabályzó teljesítményének elemzéséhez és az optimalizációs feladatok elvégzéséhez.
+
+\subsection{Adatok kiértékelése és tárolása}
+A szimulációs futtatások során gyűjtött adatok elemzésére és tárolására egy szisztematikus módszert alkalmazok. Minden egyes futtatás végén a rendszer kiszámolja a releváns metrikákat, például az időtartamot, a megtett távolságot. Ezek az értékek közvetlenül a szimuláció során keletkezett adatstruktúrákból kerülnek kiolvasásra és elemzésre, majd az eredmények egy bináris fájlban kerülnek rögzítésre, amely a Python pickle modulját használja. Az ilyen formában tárolt adatok megőrzik az eredeti adatszerkezeteket, például a listákat, szótárakat és egyéb komplex struktúrákat, ezáltal egyszerűsítve az újrafelhasználást és a későbbi feldolgozást.
+
+A pickle formátum használatának egyik fő előnye, hogy lehetővé teszi az adatok gyors és hatékony szerializálását és deszerializálását, megőrizve az eredeti Python objektumok integritását. Ezzel elkerülhetők azok a konverziós lépések, amelyek más formátumok esetén (például CSV vagy JSON) szükségesek lehetnek. További előnye, hogy kompatibilis a Python különböző adatstruktúráival, így ideális választás, ha komplex vagy hierarchikus adatokat kell menteni. Ugyanakkor érdemes megjegyezni, hogy a pickle bináris formátuma nem ember által olvasható, és kizárólag Python környezetben használható biztonságosan, ezért olyan esetekben különösen előnyös, amikor az adatokat egy zárt rendszerben kezelik.
+
+\section{Optimalizáció}
+\subsection{Optimalizációk parametrizálása}
+Az optimalizációs folyamathoz számos konfigurációs paraméter határoztam meg, amelyek biztosítják a kísérletek pontos és dokumentált futtatását. Ezek a paraméterek YAML konfigurációs fájlokban kerülnek definiálásra. Az optimalizáció során különböző tesztfutások és generátor algoritmusok alkalmazásával vizsgálható a szabályzó paramétereinek hatása.
+
+A YAML konfigurációban minden egyes optimalizációs környezet (trial) külön nevesítve van, és a hozzá tartozó paraméterek a következőképpen kerülnek meghatározásra:
+\begin{itemize}
+    \item \textbf{Térkép:} Az adott szimuláció során használt térkép neve és jellemzői.
+    \item \textbf{Robot típusa:} Például \textit{waffle}, \textit{burger} vagy egyedi modellek.
+    \item \textbf{Generátor függvény:} A paraméterek generálására alkalmazott módszer, mint például véletlen (\textit{random}), rácsos (\textit{grid}), vagy Bayes-alapú (\textit{bayesian}).
+    \item \textbf{Pontozó függvények:} A futtatások kiértékelésére szolgáló módszer, azokat pontozza/értékeli.
+    \item \textbf{Futtatások száma:} Az egyes próbálkozások során lefutó iterációk száma.
+    \item \textbf{Időtúllépési küszöb:} Egy adott futtatás maximális időkerete.
+\end{itemize}
+
+A fenti paraméterek definiálása lehetővé teszi a különböző optimalizációs technikák egyszerű összehasonlítását és az eredmények reprodukálhatóságát. A YAML fájl struktúrája jól követhetővé és egyszerűen módosíthatóvá teszi a konfigurációkat, így könnyítve a paraméterek kezelését. Az optimalizációs folyamat során a \texttt{ControllerOptimizer} osztály biztosítja az egyes futások (trials) paramétereinek betöltését, valamint a generátorok és pontozó függvények futtatását.
+
+\subsection{Optimalizációk futtatása}
+Az optimalizációs folyamat végrehajtását a \texttt{ControllerOptimizer} osztály valósítja meg, amely az optimalizációhoz szükséges paraméterek betöltésétől kezdve a generátor algoritmusok futtatásán és az eredmények tárolásán át a legjobb konfiguráció kiválasztásáig terjed. Az osztály működése szisztematikusan épül fel, biztosítva a folyamat átláthatóságát és reprodukálhatóságát. Az optimalizációk futtatása előtt az osztály betölti a YAML fájlokban definiált konfigurációkat, amelyek tartalmazzák az egyes próbálkozásokhoz (trials) tartozó térkép-, robot- és szabályzó paramétereket. Ezen kívül létrehozza a futtatáshoz szükséges mappastruktúrát, ahol az eredmények, metrikák és a szimulációs beállítások tárolásra kerülnek. Az optimalizáció előkészítésének fontos lépése a referenciafuttatás végrehajtása (az alap szabályzó paraméterekkel), amely meghatározza a kiindulási pontszámot és metrikákat az egyes próbálkozások összehasonlításához.
+
+Az iterációk során az osztály minden egyes lépésben az adott generátor algoritmus által meghatározott paraméterkombinációval futtatja a szimulációt. A generátor algoritmusok, például véletlenszerű, grid vagy Bayes-alapú módszerek, különböző stratégiákat követnek a paraméterek előállítására, biztosítva a paramétertér hatékony feltérképezését. A \texttt{ControllerOptimizer} minden iteráció elején automatikusan frissíti a szabályzó aktuális konfigurációját a generált paraméterek alapján, majd elindítja a szimulációt a \texttt{ControllerBenchmark} osztály segítségével. 
+
+Az adatgyűjtés a folyamat szerves része, amely biztosítja az iterációk eredményeinek rögzítését és elemzését. A szimuláció közben külön node-ok figyelik a robot mozgását, a szabályzó által generált sebességeket, a critic függvények értékeit és a costmap adatait. Az iterációk végeztével a \texttt{ControllerOptimizer} az összegyűjtött adatokat fájlokba menti, amelyek tartalmazzák a paramétereket és a hozzájuk tartozó adatoakt és eredményeket. Ez lehetővé teszi a teljes folyamat későbbi elemzését és a különböző konfigurációk összehasonlítását. Az osztály ezenkívül folyamatosan nyomon követi az aktuálisan legjobb konfigurációt, amely a legjobb pontszámot érte el az iterációk során. Az optimalizációs folyamat végén a rendszer automatikusan kinyeri és tárolja a legjobb paramétereket, amelyek a legjobb teljesítményt nyújtották.
+
+\section{Modularitás és párhuzamosítás}
+Ahogy a tervezés fejezetben is kifejtettem, törekedtem egy moduláris szoftvercsomagot összeállítani. Természetesen a diplomamunka tekintetében egy probléma volt fontos, az MPPI szabályzó optimalizálása, viszont megvalósítás közben végig igyekeztem figyelni, általánosabb implementációkat hozzak létre. Ez azért is volt fontos, hogy későbbi munka során újrafelhasználható legyen, például ha szabályzó helyett egy útvonaltervezőt szeretnénk vizsgálni, van rá lehetőség, hogy kis módosítással (paraméter beállítások megváltoztatásával) a kód nagyrésze újrafelhasználható legyen.
+
+Az optimalizációk és mérések futtatása során gyakran jelentős futási idővel kell számolni, ezért a munkafolyamatokat konténerizált környezetben végeztem. A konténerizáció egy rugalmas megoldás, amely lehetővé teszi a különböző szimulációk és kódok párhuzamos futtatását, miközben biztosítja a környezetek izolációját és a könnyű kezelhetőséget.
+
+A \texttt{Dockerfile} egy speciális konfigurációs fájl, amelyből egyedi image-ek készíthetők. Ezek az image-ek tartalmazzák a futtatási környezet összes szükséges komponensét, például a szoftverkövetelményeket, a függőségeket és az alkalmazás telepítéséhez szükséges utasításokat. Az így létrehozott image-ekből több konténer is indítható, amelyek egymástól függetlenül működnek, de ugyanazt az alaprendszert használják. A \texttt{ROS\_DOMAIN\_ID} és a \texttt{GAZEBO\_MASTER\_URI} konfigurációs paraméterek különböző értékekkel történő beállításával biztosítható, hogy az egyes konténerek különálló szimulációkat futtassanak anélkül, hogy interferálnának egymással.
+
+A \texttt{ROS\_DOMAIN\_ID} a ROS környezetben egy azonosító, amely meghatározza a kommunikációs tartományt. Ez lehetővé teszi, hogy különböző robotrendszerek egymástól függetlenül működjenek, még akkor is, ha ugyanazon a hálózaton osztoznak. Hasonlóképpen, a \texttt{GAZEBO\_MASTER\_URI} a Gazebo szimulátor számára határozza meg, hogy melyik szerverhez csatlakozzon. Ez a paraméter biztosítja, hogy minden konténer saját, izolált szimulációs környezetet futtasson.
+
+A kódfejlesztés és a mérések megkönnyítése érdekében a konténerek használata során a kódfájlokat úgynevezett mount-olással csatoltam a helyi fájlrendszerhez. A mount-olás során a gazdagép (host machine) meghatározott mappája a konténeren belül elérhetővé válik, így az azon végzett módosítások azonnal tükröződnek a konténerben futó alkalmazásban. Ez a megoldás nemcsak a fejlesztési folyamatot gyorsítja fel, hanem biztosítja, hogy a kód legfrissebb verziója mindig elérhető legyen a szimulációk és mérések futtatásához.
+
+A konténerizált környezet használata tehát nemcsak párhuzamos futtatást tesz lehetővé, hanem rugalmasan kezeli a különböző futtatási beállításokat, minimalizálva a konfigurációs hibák és a környezeti eltérések kockázatát. Ezáltal a rendszer skálázhatósága és hatékonysága jelentősen javul, ami különösen fontos a hosszabb futásidővel járó optimalizációk és mérések esetében.
